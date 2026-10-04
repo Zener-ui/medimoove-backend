@@ -1,0 +1,26 @@
+-- ============================================================
+-- FIX #30 — CLOSE PUBLIC users INSERT RLS BYPASS
+--
+-- The users table previously had:
+--   CREATE POLICY "users_insert_public" ON users
+--     FOR INSERT WITH CHECK (true);
+--
+-- That is unsafe because Fidelx authentication is handled by the Node
+-- backend, not by Supabase Auth. The backend creates users with the
+-- service-role client. Therefore no anon/authenticated client needs direct
+-- INSERT access to users.
+--
+-- With the old policy, anyone who knows the public Supabase URL + anon key
+-- could insert a row directly and choose protected values such as role,
+-- is_active, and password_hash. In particular, inserting role='admin' with
+-- a password hash the attacker controls could create a backend-login admin
+-- account without going through registration, terms acceptance, invite
+-- rules, or the pilot guard.
+--
+-- Fix: remove the public INSERT policy. service_role (the backend) bypasses
+-- RLS and remains able to create accounts through register_user_atomic().
+-- Existing authenticated users retain their own SELECT/UPDATE policies,
+-- while account creation is now backend-only.
+-- ============================================================
+
+DROP POLICY IF EXISTS "users_insert_public" ON users;

@@ -1,0 +1,1286 @@
+/mnt/data/fix13/controllers/couponController.js:11:// in subOrderController — platform_fee and vendor_payout are
+/mnt/data/fix13/controllers/inventoryController.js:100:// Called on cancellation
+/mnt/data/fix13/controllers/feeController.js:8:      .select("platform_fee_percentage, withdrawal_fee_percentage, withdrawal_fee_cap")
+/mnt/data/fix13/controllers/feeController.js:18:        withdrawal_fee_percentage: Number(data?.withdrawal_fee_percentage ?? 1),
+/mnt/data/fix13/controllers/feeController.js:19:        withdrawal_fee_cap: Number(data?.withdrawal_fee_cap ?? 2000),
+/mnt/data/fix13/controllers/riderController.js:389:    // Get balance from balances table (source of truth)
+/mnt/data/fix13/controllers/riderController.js:390:    const { data: balance } = await adminClient
+/mnt/data/fix13/controllers/riderController.js:391:      .from("balances")
+/mnt/data/fix13/controllers/riderController.js:392:      .select("available_balance, pending_balance, total_earned, total_withdrawn")
+/mnt/data/fix13/controllers/riderController.js:397:      .from("refund_liabilities")
+/mnt/data/fix13/controllers/riderController.js:398:      .select("id, refund_id, responsible_type, original_amount, recovered_amount, status, created_at, updated_at")
+/mnt/data/fix13/controllers/riderController.js:403:    const outstanding_refund_liability = (liabilities || []).reduce((sum, x) => sum + Number(x.original_amount || 0) - Number(x.recovered_amount || 0), 0);
+/mnt/data/fix13/controllers/riderController.js:408:      .select("id, rider_payout, status, delivered_at, created_at, order_id")
+/mnt/data/fix13/controllers/riderController.js:416:      available_balance: balance?.available_balance ?? 0,
+/mnt/data/fix13/controllers/riderController.js:417:      pending_balance: balance?.pending_balance ?? 0,
+/mnt/data/fix13/controllers/riderController.js:418:      total_earned: balance?.total_earned ?? 0,
+/mnt/data/fix13/controllers/riderController.js:419:      total_withdrawn: balance?.total_withdrawn ?? 0,
+/mnt/data/fix13/controllers/riderController.js:420:      outstanding_refund_liability,
+/mnt/data/fix13/controllers/riderController.js:421:      refund_liabilities: liabilities || [],
+/mnt/data/fix13/controllers/adminController.js:4:const { executeRefund, initiatePreDeliveryCancellationRefund } = require("./operationalController");
+/mnt/data/fix13/controllers/adminController.js:380:      refund_type = "full",
+/mnt/data/fix13/controllers/adminController.js:403:    // a still-open/appealed row can proceed to executeRefund at all.
+/mnt/data/fix13/controllers/adminController.js:412:    let refundResult = null;
+/mnt/data/fix13/controllers/adminController.js:414:    // An approved dispute now means a real Paystack refund is initiated as
+/mnt/data/fix13/controllers/adminController.js:416:    // before Paystack accepts the refund request.
+/mnt/data/fix13/controllers/adminController.js:418:      if (!fault_party) return res.status(400).json({ success: false, message: "Select who is responsible for the refund." });
+/mnt/data/fix13/controllers/adminController.js:421:        refundResult = await executeRefund({
+/mnt/data/fix13/controllers/adminController.js:426:          refund_type,
+/mnt/data/fix13/controllers/adminController.js:431:          refund_stage: "post_delivery",
+/mnt/data/fix13/controllers/adminController.js:436:          // on the admin's end returns the same refund instead of
+/mnt/data/fix13/controllers/adminController.js:440:      } catch (refundError) {
+/mnt/data/fix13/controllers/adminController.js:442:        // refund itself failed, put it back to "open" (not "resolved")
+/mnt/data/fix13/controllers/adminController.js:448:          message: refundError.message,
+/mnt/data/fix13/controllers/adminController.js:449:          refund_started: false,
+/mnt/data/fix13/controllers/adminController.js:466:      title: decision === "approved" ? "Refund Initiated 💰" : "Dispute Resolved",
+/mnt/data/fix13/controllers/adminController.js:468:        ? `Your refund of ₦${Number(refundResult.refund.amount).toLocaleString()} has been initiated and is currently ${refundResult.refund.status}.`
+/mnt/data/fix13/controllers/adminController.js:469:        : "Your dispute was reviewed and rejected. No refund will be issued.",
+/mnt/data/fix13/controllers/adminController.js:475:      refund_id: refundResult?.refund.id || null,
+/mnt/data/fix13/controllers/adminController.js:476:      refund_status: refundResult?.refund.status || null,
+/mnt/data/fix13/controllers/adminController.js:478:        ? `Dispute approved and refund initiated. Paystack status: ${refundResult.refund.status}.`
+/mnt/data/fix13/controllers/adminController.js:706:// @route GET /api/admin/reconcile-balances
+/mnt/data/fix13/controllers/adminController.js:707:// Surfaces reconcile_balances() (backend/supabase/atomic_functions.sql) —
+/mnt/data/fix13/controllers/adminController.js:711:const reconcileBalances = async (req, res) => {
+/mnt/data/fix13/controllers/adminController.js:713:    const { data, error } = await adminClient.rpc("reconcile_balances");
+/mnt/data/fix13/controllers/adminController.js:736:// @route GET /api/admin/cancellation-refunds
+/mnt/data/fix13/controllers/adminController.js:737:// Lists sub-orders that were cancelled after payment where the
+/mnt/data/fix13/controllers/adminController.js:738:// automatic refund (initiatePreDeliveryCancellationRefund, fired from
+/mnt/data/fix13/controllers/adminController.js:739:// cancelSubOrder / updateSubOrderStatus) either was never triggered
+/mnt/data/fix13/controllers/adminController.js:742:// on it. "Stuck" here means: the sub-order is CANCELLED, its parent
+/mnt/data/fix13/controllers/adminController.js:743:// order was actually paid for, and there is no refund row for it that
+/mnt/data/fix13/controllers/adminController.js:745:const getStuckCancellationRefunds = async (req, res) => {
+/mnt/data/fix13/controllers/adminController.js:747:    const { data: cancelledSubOrders, error } = await adminClient
+/mnt/data/fix13/controllers/adminController.js:749:      .select("id, order_id, vendor_id, subtotal, platform_fee, delivery_fee, cancelled_at, orders!inner(payment_status, customer_id), vendors(business_name)")
+/mnt/data/fix13/controllers/adminController.js:750:      .eq("status", "CANCELLED")
+/mnt/data/fix13/controllers/adminController.js:752:      .order("cancelled_at", { ascending: false });
+/mnt/data/fix13/controllers/adminController.js:755:    if (!cancelledSubOrders?.length) return res.json({ success: true, stuck: [] });
+/mnt/data/fix13/controllers/adminController.js:757:    const subOrderIds = cancelledSubOrders.map((s) => s.id);
+/mnt/data/fix13/controllers/adminController.js:758:    const { data: existingRefunds } = await adminClient
+/mnt/data/fix13/controllers/adminController.js:759:      .from("refunds")
+/mnt/data/fix13/controllers/adminController.js:764:    const handledIds = new Set((existingRefunds || []).map((r) => r.sub_order_id));
+/mnt/data/fix13/controllers/adminController.js:765:    const stuck = cancelledSubOrders
+/mnt/data/fix13/controllers/adminController.js:771:        refundable_amount: Number(s.subtotal || 0) + Number(s.platform_fee || 0) + Number(s.delivery_fee || 0),
+/mnt/data/fix13/controllers/adminController.js:772:        cancelled_at: s.cancelled_at,
+/mnt/data/fix13/controllers/adminController.js:781:// @route POST /api/admin/cancellation-refunds/:subOrderId/retry
+/mnt/data/fix13/controllers/adminController.js:782:const retryCancellationRefund = async (req, res) => {
+/mnt/data/fix13/controllers/adminController.js:786:      .select("id, status, order_id, vendor_id, subtotal, platform_fee, delivery_fee, vendor_payout, rider_payout, rider_id")
+/mnt/data/fix13/controllers/adminController.js:791:    if (subOrder.status !== "CANCELLED") {
+/mnt/data/fix13/controllers/adminController.js:792:      return res.status(400).json({ success: false, message: "This sub-order is not cancelled." });
+/mnt/data/fix13/controllers/adminController.js:795:    const result = await initiatePreDeliveryCancellationRefund({
+/mnt/data/fix13/controllers/adminController.js:801:    res.json({ success: true, message: "Refund re-initiated.", refund: result?.refund });
+/mnt/data/fix13/controllers/adminController.js:812:  reconcileBalances,
+/mnt/data/fix13/controllers/adminController.js:814:  getStuckCancellationRefunds,
+/mnt/data/fix13/controllers/adminController.js:815:  retryCancellationRefund,
+/mnt/data/fix13/controllers/supportController.js:4:const ESCALATE_IMMEDIATELY = ["refund", "fraud", "payment", "wrong item", "damaged", "safety", "dispute", "stolen"];
+/mnt/data/fix13/controllers/receiptController.js:58:  if (type === "WITHDRAWAL") {
+/mnt/data/fix13/controllers/receiptController.js:62:      <div class="row"><span>Withdrawal Fee (${escapeHtml(String(data.fee_percentage))}%)</span><span>-₦${Number(data.withdrawal_fee)?.toLocaleString()}</span></div>
+/mnt/data/fix13/controllers/receiptController.js:63:      <div class="total-row"><span>Net Payout</span><span>₦${Number(data.net_payout)?.toLocaleString()}</span></div>
+/mnt/data/fix13/controllers/receiptController.js:66:      <div class="footer">Fidelx Withdrawal Receipt</div>
+/mnt/data/fix13/controllers/receiptController.js:70:  if (type === "REFUND") {
+/mnt/data/fix13/controllers/receiptController.js:74:      <div class="row"><span>Refund Reason</span><span>${escapeHtml(data.reason)}</span></div>
+/mnt/data/fix13/controllers/receiptController.js:75:      <div class="total-row"><span>Refund Amount</span><span>₦${Number(data.amount)?.toLocaleString()}</span></div>
+/mnt/data/fix13/controllers/receiptController.js:76:      <div class="footer">Refund processed by Fidelx Support</div>
+/mnt/data/fix13/controllers/receiptController.js:167:// The frontend has an order/withdrawal/refund's own ID (reference_id),
+/mnt/data/fix13/controllers/paymentController.js:7:const { finalizeProcessedRefund } = require("./operationalController");
+/mnt/data/fix13/controllers/paymentController.js:112:  // vendor's or rider's payout — both are computed independently and
+/mnt/data/fix13/controllers/paymentController.js:282:const completeVendorRiderWithdrawal = async (withdrawal, paystackStatus = "success") => {
+/mnt/data/fix13/controllers/paymentController.js:283:  // Complete the withdrawal and every money-side effect in ONE database
+/mnt/data/fix13/controllers/paymentController.js:285:  // first, then updated total_withdrawn / ledger / fee revenue in separate
+/mnt/data/fix13/controllers/paymentController.js:288:  const { data: completed, error: completionError } = await adminClient.rpc("complete_vendor_rider_withdrawal", {
+/mnt/data/fix13/controllers/paymentController.js:289:    p_withdrawal_id: withdrawal.id,
+/mnt/data/fix13/controllers/paymentController.js:296:    id: uuidv4(), user_id: withdrawal.requester_id, title: "Withdrawal Completed",
+/mnt/data/fix13/controllers/paymentController.js:297:    body: `Your withdrawal of ₦${Number(withdrawal.net_payout).toLocaleString()} has been sent to your bank account.`, is_read: false,
+/mnt/data/fix13/controllers/paymentController.js:299:  if (notificationError) console.warn("[WITHDRAWAL] Completion notification failed:", notificationError.message);
+/mnt/data/fix13/controllers/paymentController.js:303:const failVendorRiderWithdrawal = async (withdrawal, paystackStatus, reason) => {
+/mnt/data/fix13/controllers/paymentController.js:305:    .from("withdrawals")
+/mnt/data/fix13/controllers/paymentController.js:307:    .eq("id", withdrawal.id)
+/mnt/data/fix13/controllers/paymentController.js:314:  const { error: restoreError } = await adminClient.rpc("restore_balance_after_rejection", {
+/mnt/data/fix13/controllers/paymentController.js:315:    p_user_id: withdrawal.requester_id, p_amount: withdrawal.gross_amount,
+/mnt/data/fix13/controllers/paymentController.js:320:    id: uuidv4(), user_id: withdrawal.requester_id, title: "Withdrawal Failed",
+/mnt/data/fix13/controllers/paymentController.js:321:    body: `Your withdrawal could not be completed by Paystack. Your balance has been restored — please try again or contact support.`, is_read: false,
+/mnt/data/fix13/controllers/paymentController.js:343:      let query = adminClient.from("platform_withdrawals").select("id, amount, status, paystack_reference").limit(1);
+/mnt/data/fix13/controllers/paymentController.js:349:      const { data: platformWithdrawal } = await query.maybeSingle();
+/mnt/data/fix13/controllers/paymentController.js:351:      if (platformWithdrawal) {
+/mnt/data/fix13/controllers/paymentController.js:356:          await adminClient.rpc("complete_platform_withdrawal", {
+/mnt/data/fix13/controllers/paymentController.js:357:            p_withdrawal_id: platformWithdrawal.id,
+/mnt/data/fix13/controllers/paymentController.js:361:          // Failure must restore the balance and mark the withdrawal failed
+/mnt/data/fix13/controllers/paymentController.js:364:          // same platform balance more than once.
+/mnt/data/fix13/controllers/paymentController.js:365:          await adminClient.rpc("fail_platform_withdrawal", {
+/mnt/data/fix13/controllers/paymentController.js:366:            p_withdrawal_id: platformWithdrawal.id,
+/mnt/data/fix13/controllers/paymentController.js:374:      // Not a platform withdrawal — check vendor/rider withdrawals.
+/mnt/data/fix13/controllers/paymentController.js:377:      // event for a vendor/rider withdrawal was silently discarded and
+/mnt/data/fix13/controllers/paymentController.js:378:      // the withdrawal stayed stuck on PROCESSING forever.
+/mnt/data/fix13/controllers/paymentController.js:379:      let vrQuery = adminClient.from("withdrawals").select("id, status, requester_id, gross_amount, withdrawal_fee, net_payout, account_name").limit(1);
+/mnt/data/fix13/controllers/paymentController.js:384:      const { data: withdrawal } = await vrQuery.maybeSingle();
+/mnt/data/fix13/controllers/paymentController.js:385:      if (!withdrawal) return res.sendStatus(200);
+/mnt/data/fix13/controllers/paymentController.js:391:        await completeVendorRiderWithdrawal(withdrawal, data.status || event.event);
+/mnt/data/fix13/controllers/paymentController.js:393:        await failVendorRiderWithdrawal(
+/mnt/data/fix13/controllers/paymentController.js:394:          withdrawal,
+/mnt/data/fix13/controllers/paymentController.js:446:    const refundEvents = new Set([
+/mnt/data/fix13/controllers/paymentController.js:447:      "refund.pending",
+/mnt/data/fix13/controllers/paymentController.js:448:      "refund.processing",
+/mnt/data/fix13/controllers/paymentController.js:449:      "refund.needs-attention",
+/mnt/data/fix13/controllers/paymentController.js:450:      "refund.failed",
+/mnt/data/fix13/controllers/paymentController.js:451:      "refund.processed",
+/mnt/data/fix13/controllers/paymentController.js:454:    if (refundEvents.has(event.event)) {
+/mnt/data/fix13/controllers/paymentController.js:456:      const refundReference = data.refund_reference || data.id || null;
+/mnt/data/fix13/controllers/paymentController.js:459:      let query = adminClient.from("refunds").select("id, status, paystack_refund_id").limit(1);
+/mnt/data/fix13/controllers/paymentController.js:460:      if (refundReference) {
+/mnt/data/fix13/controllers/paymentController.js:461:        query = query.eq("paystack_refund_id", String(refundReference));
+/mnt/data/fix13/controllers/paymentController.js:468:      const { data: refund } = await query.maybeSingle();
+/mnt/data/fix13/controllers/paymentController.js:469:      if (!refund) return res.sendStatus(200);
+/mnt/data/fix13/controllers/paymentController.js:472:        "refund.pending": "pending",
+/mnt/data/fix13/controllers/paymentController.js:473:        "refund.processing": "processing",
+/mnt/data/fix13/controllers/paymentController.js:474:        "refund.needs-attention": "needs_attention",
+/mnt/data/fix13/controllers/paymentController.js:475:        "refund.failed": "failed",
+/mnt/data/fix13/controllers/paymentController.js:476:        "refund.processed": "processed",
+/mnt/data/fix13/controllers/paymentController.js:481:        await adminClient.from("refunds").update({
+/mnt/data/fix13/controllers/paymentController.js:484:          failure_reason: data.reason || data.message || "Paystack refund failed.",
+/mnt/data/fix13/controllers/paymentController.js:486:        }).eq("id", refund.id);
+/mnt/data/fix13/controllers/paymentController.js:488:        await adminClient.from("refunds").update({
+/mnt/data/fix13/controllers/paymentController.js:492:        }).eq("id", refund.id);
+/mnt/data/fix13/controllers/paymentController.js:493:        await finalizeProcessedRefund(refund.id);
+/mnt/data/fix13/controllers/paymentController.js:495:        await adminClient.from("refunds").update({
+/mnt/data/fix13/controllers/paymentController.js:498:        }).eq("id", refund.id);
+/mnt/data/fix13/controllers/paymentController.js:509:module.exports = { initializePayment, verifyPayment, paystackWebhook, processSuccessfulPayment, applyPaymentSideEffects, completeVendorRiderWithdrawal, failVendorRiderWithdrawal };
+/mnt/data/fix13/controllers/deliveryController.js:56:      rider_payout: manual_override_fee - delivery_margin,
+/mnt/data/fix13/controllers/deliveryController.js:79:  const rider_payout = fee - delivery_margin;
+/mnt/data/fix13/controllers/deliveryController.js:84:    rider_payout,
+/mnt/data/fix13/controllers/orderController.js:5:// cancelOrder, and confirmDelivery — leftover from an early single-
+/mnt/data/fix13/controllers/subOrderController.js:6:const { spendFromPromotionsBudget, refundToPromotionsBudget } = require("./promotionsController");
+/mnt/data/fix13/controllers/subOrderController.js:7:const { initiatePreDeliveryCancellationRefund } = require("./operationalController");
+/mnt/data/fix13/controllers/subOrderController.js:93:// Called on cancellation or payment failure
+/mnt/data/fix13/controllers/subOrderController.js:106:    // concurrent cancellation requests for the same order safe: only
+/mnt/data/fix13/controllers/subOrderController.js:394:        let riderPayout = 0;
+/mnt/data/fix13/controllers/subOrderController.js:412:          riderPayout = calc.rider_payout;
+/mnt/data/fix13/controllers/subOrderController.js:425:          rider_payout: riderPayout,
+/mnt/data/fix13/controllers/subOrderController.js:426:          vendor_payout: groupSubtotal, // Vendor gets full product price
+/mnt/data/fix13/controllers/subOrderController.js:435:    // customer-facing total; platform_fee and vendor_payout above were
+/mnt/data/fix13/controllers/subOrderController.js:508:    // vendor_payout stay exactly as computed above (undiscounted) —
+/mnt/data/fix13/controllers/subOrderController.js:543:      const withdrawalAvailableAt = new Date();
+/mnt/data/fix13/controllers/subOrderController.js:544:      withdrawalAvailableAt.setHours(withdrawalAvailableAt.getHours() + 1); // matches the DELIVERED-time value; overwritten there regardless
+/mnt/data/fix13/controllers/subOrderController.js:560:        vendor_payout: group.vendor_payout,
+/mnt/data/fix13/controllers/subOrderController.js:561:        rider_payout: group.rider_payout,
+/mnt/data/fix13/controllers/subOrderController.js:562:        withdrawal_available_at: withdrawalAvailableAt.toISOString(),
+/mnt/data/fix13/controllers/subOrderController.js:614:        await refundToPromotionsBudget({ reference: mainOrderId, type: "COUPON_DISCOUNT" });
+/mnt/data/fix13/controllers/subOrderController.js:720:      .select("id, status, order_id, vendor_id, rider_id, vendor_payout, rider_payout, delivery_type")
+/mnt/data/fix13/controllers/subOrderController.js:733:    // delivery complete, and any customer could dispute/cancel someone
+/mnt/data/fix13/controllers/subOrderController.js:793:      const withdrawalAt = new Date();
+/mnt/data/fix13/controllers/subOrderController.js:794:      withdrawalAt.setHours(withdrawalAt.getHours() + 1);
+/mnt/data/fix13/controllers/subOrderController.js:796:      updates.withdrawal_available_at = withdrawalAt.toISOString();
+/mnt/data/fix13/controllers/subOrderController.js:799:    if (status === STATUSES.CANCELLED) {
+/mnt/data/fix13/controllers/subOrderController.js:800:      updates.cancelled_at = new Date().toISOString();
+/mnt/data/fix13/controllers/subOrderController.js:808:    // either write landed, then both go on to credit balances below.
+/mnt/data/fix13/controllers/subOrderController.js:837:    // If delivered — credit balances. credit_delivery_payout is ALSO
+/mnt/data/fix13/controllers/subOrderController.js:851:        await adminClient.rpc("credit_delivery_payout", {
+/mnt/data/fix13/controllers/subOrderController.js:852:          p_sub_order_id: subOrder.id, p_role: "vendor", p_user_id: vendor.user_id, p_amount: subOrder.vendor_payout,
+/mnt/data/fix13/controllers/subOrderController.js:864:          await adminClient.rpc("credit_delivery_payout", {
+/mnt/data/fix13/controllers/subOrderController.js:865:            p_sub_order_id: subOrder.id, p_role: "rider", p_user_id: rider.user_id, p_amount: subOrder.rider_payout,
+/mnt/data/fix13/controllers/subOrderController.js:876:      // now record it in sub_order_payouts (role: platform_margin) so
+/mnt/data/fix13/controllers/subOrderController.js:877:      // a later refund/cancellation on this sub-order knows exactly
+/mnt/data/fix13/controllers/subOrderController.js:889:        await adminClient.rpc("credit_delivery_payout", {
+/mnt/data/fix13/controllers/subOrderController.js:900:        amount: subOrder.vendor_payout + subOrder.rider_payout + platformRevenue,
+/mnt/data/fix13/controllers/subOrderController.js:902:        destination: "vendor_rider_and_platform_balances",
+/mnt/data/fix13/controllers/subOrderController.js:904:        description: `Sub-order delivered. Vendor: ₦${subOrder.vendor_payout}, Rider: ₦${subOrder.rider_payout}, Platform: ₦${platformRevenue}`,
+/mnt/data/fix13/controllers/subOrderController.js:908:    // If cancelled — release inventory and, if the customer had already
+/mnt/data/fix13/controllers/subOrderController.js:909:    // paid, actually start a refund. Previously this branch only
+/mnt/data/fix13/controllers/subOrderController.js:913:    // is the one cancelling, since both go through this same handler).
+/mnt/data/fix13/controllers/subOrderController.js:914:    if (status === STATUSES.CANCELLED) {
+/mnt/data/fix13/controllers/subOrderController.js:925:          await initiatePreDeliveryCancellationRefund({
+/mnt/data/fix13/controllers/subOrderController.js:930:        } catch (refundErr) {
+/mnt/data/fix13/controllers/subOrderController.js:931:          console.error(`[cancel-sub-order] Refund initiation failed for ${subOrder.id}:`, refundErr.message);
+/mnt/data/fix13/controllers/subOrderController.js:933:            "Cancellation refund failed to initiate",
+/mnt/data/fix13/controllers/subOrderController.js:934:            `Sub-order ${subOrder.id} was cancelled after payment, but the automatic refund could not be started (${refundErr.message}). Needs manual review.`
+/mnt/data/fix13/controllers/subOrderController.js:948:    const allCancelled = allSubOrders?.every((so) => so.status === STATUSES.CANCELLED);
+/mnt/data/fix13/controllers/subOrderController.js:960:      // alone is deliberately not enough: a customer can still cancel
+/mnt/data/fix13/controllers/subOrderController.js:961:      // or be refunded after payment, and those orders must not count as
+/mnt/data/fix13/controllers/subOrderController.js:1002:    if (allCancelled) {
+/mnt/data/fix13/controllers/subOrderController.js:1003:      await adminClient.from("orders").update({ status: STATUSES.CANCELLED }).eq("id", subOrder.order_id);
+/mnt/data/fix13/controllers/subOrderController.js:1030:// CANCEL SUB-ORDER
+/mnt/data/fix13/controllers/subOrderController.js:1031:// @route POST /api/sub-orders/:subOrderId/cancel
+/mnt/data/fix13/controllers/subOrderController.js:1033:const cancelSubOrder = async (req, res) => {
+/mnt/data/fix13/controllers/subOrderController.js:1052:    // Cancellability is derived from the state machine's own transition
+/mnt/data/fix13/controllers/subOrderController.js:1053:    // rules (CANCELLED is only reachable from PENDING_PAYMENT and
+/mnt/data/fix13/controllers/subOrderController.js:1057:    // RIDER_ASSIGNED ended up still cancellable after the vendor had
+/mnt/data/fix13/controllers/subOrderController.js:1060:    if (!canTransition(subOrder.status, STATUSES.CANCELLED)) {
+/mnt/data/fix13/controllers/subOrderController.js:1063:        message: "This order can no longer be cancelled — the store has already started preparing it.",
+/mnt/data/fix13/controllers/subOrderController.js:1068:    // fix. Two concurrent cancel requests for the same sub-order (audit
+/mnt/data/fix13/controllers/subOrderController.js:1071:    // through inventory release and refund initiation a second time.
+/mnt/data/fix13/controllers/subOrderController.js:1075:      p_new_status: STATUSES.CANCELLED,
+/mnt/data/fix13/controllers/subOrderController.js:1079:      return res.json({ success: true, message: "Sub-order is already cancelled.", already_applied: true });
+/mnt/data/fix13/controllers/subOrderController.js:1081:    await adminClient.from("sub_orders").update({ cancelled_at: new Date().toISOString() }).eq("id", req.params.subOrderId);
+/mnt/data/fix13/controllers/subOrderController.js:1086:    // If payment was actually collected, start the refund now — this
+/mnt/data/fix13/controllers/subOrderController.js:1087:    // route previously just said "refund will be processed" without
+/mnt/data/fix13/controllers/subOrderController.js:1089:    // generic updateSubOrderStatus CANCELLED branch already got this
+/mnt/data/fix13/controllers/subOrderController.js:1091:    const { data: parentOrderForRefund } = await adminClient
+/mnt/data/fix13/controllers/subOrderController.js:1097:    if (parentOrderForRefund?.payment_status === "successful") {
+/mnt/data/fix13/controllers/subOrderController.js:1099:        await initiatePreDeliveryCancellationRefund({
+/mnt/data/fix13/controllers/subOrderController.js:1104:      } catch (refundErr) {
+/mnt/data/fix13/controllers/subOrderController.js:1105:        console.error(`[cancel-sub-order] Refund initiation failed for ${subOrder.id}:`, refundErr.message);
+/mnt/data/fix13/controllers/subOrderController.js:1107:          "Cancellation refund failed to initiate",
+/mnt/data/fix13/controllers/subOrderController.js:1108:          `Sub-order ${subOrder.id} was cancelled by the customer after payment, but the automatic refund could not be started (${refundErr.message}). Needs manual review.`
+/mnt/data/fix13/controllers/subOrderController.js:1113:    res.json({ success: true, message: "Sub-order cancelled. Refund will be processed if payment was made." });
+/mnt/data/fix13/controllers/subOrderController.js:1120:// CREDIT PENDING BALANCE HELPER
+/mnt/data/fix13/controllers/subOrderController.js:1121:// Wraps the atomic credit_pending_balance() SQL function (see
+/mnt/data/fix13/controllers/subOrderController.js:1122:// settlement_hold_migration.sql). Replaces the old upsertBalance,
+/mnt/data/fix13/controllers/subOrderController.js:1126:// silently losing one credit). Also now credits pending_balance
+/mnt/data/fix13/controllers/subOrderController.js:1127:// instead of available_balance directly — money only becomes
+/mnt/data/fix13/controllers/subOrderController.js:1128:// withdrawable once release_matured_sub_order_balances() moves it
+/mnt/data/fix13/controllers/subOrderController.js:1129:// across, after withdrawal_available_at has passed.
+/mnt/data/fix13/controllers/subOrderController.js:1131:const creditPendingBalance = async (userId, amount) => {
+/mnt/data/fix13/controllers/subOrderController.js:1132:  const { error } = await adminClient.rpc("credit_pending_balance", { p_user_id: userId, p_amount: amount });
+/mnt/data/fix13/controllers/subOrderController.js:1267:  cancelSubOrder,
+/mnt/data/fix13/controllers/platformRevenueController.js:13:const getPlatformBalance = async (req,res) => {
+/mnt/data/fix13/controllers/platformRevenueController.js:18:    res.json({success:true,balance:data});
+/mnt/data/fix13/controllers/platformRevenueController.js:31:const getPlatformWithdrawals = async (req,res) => {
+/mnt/data/fix13/controllers/platformRevenueController.js:33:    const { data,error } = await adminClient.from("platform_withdrawals")
+/mnt/data/fix13/controllers/platformRevenueController.js:36:    res.json({success:true,withdrawals:data||[]});
+/mnt/data/fix13/controllers/platformRevenueController.js:40:const requestPlatformWithdrawal = async (req,res) => {
+/mnt/data/fix13/controllers/platformRevenueController.js:45:      return res.status(400).json({success:false,message:"Enter a valid withdrawal amount."});
+/mnt/data/fix13/controllers/platformRevenueController.js:49:    const {data:pending}=await adminClient.from("platform_withdrawals")
+/mnt/data/fix13/controllers/platformRevenueController.js:52:      return res.status(400).json({success:false,message:"A platform withdrawal is already pending or processing."});
+/mnt/data/fix13/controllers/platformRevenueController.js:54:    const {data:deducted,error:deductError}=await adminClient.rpc("atomic_platform_withdrawal",{p_amount:numericAmount});
+/mnt/data/fix13/controllers/platformRevenueController.js:56:    if(!deducted) return res.status(400).json({success:false,message:"Insufficient platform balance."});
+/mnt/data/fix13/controllers/platformRevenueController.js:59:    const {data:withdrawal,error}=await adminClient.from("platform_withdrawals")
+/mnt/data/fix13/controllers/platformRevenueController.js:67:      await adminClient.rpc("restore_platform_balance",{p_amount:numericAmount});
+/mnt/data/fix13/controllers/platformRevenueController.js:72:      id:uuidv4(),reference:id,source_type:"PLATFORM_WITHDRAWAL",
+/mnt/data/fix13/controllers/platformRevenueController.js:73:      amount:-numericAmount,description:`Platform withdrawal request of ₦${numericAmount.toLocaleString()}`,
+/mnt/data/fix13/controllers/platformRevenueController.js:77:    res.status(201).json({success:true,withdrawal});
+/mnt/data/fix13/controllers/platformRevenueController.js:81:const approvePlatformWithdrawal = async (req,res) => {
+/mnt/data/fix13/controllers/platformRevenueController.js:84:    const {data:withdrawal,error}=await adminClient.from("platform_withdrawals")
+/mnt/data/fix13/controllers/platformRevenueController.js:86:    if(error||!withdrawal) return res.status(404).json({success:false,message:"Platform withdrawal not found."});
+/mnt/data/fix13/controllers/platformRevenueController.js:87:    if(withdrawal.status!=="PENDING") return res.status(400).json({success:false,message:"Platform withdrawal is not pending."});
+/mnt/data/fix13/controllers/platformRevenueController.js:90:    const { data: claimed } = await adminClient.rpc("claim_platform_withdrawal_for_approval", {
+/mnt/data/fix13/controllers/platformRevenueController.js:91:      p_withdrawal_id: withdrawal.id, p_admin_id: req.user.id,
+/mnt/data/fix13/controllers/platformRevenueController.js:93:    if (!claimed) return res.status(409).json({success:false,message:"This platform withdrawal is already being processed."});
+/mnt/data/fix13/controllers/platformRevenueController.js:96:      type:"nuban",name:withdrawal.account_name,account_number:withdrawal.bank_account,
+/mnt/data/fix13/controllers/platformRevenueController.js:97:      bank_code:withdrawal.bank_code,currency:"NGN"
+/mnt/data/fix13/controllers/platformRevenueController.js:103:    const reference=`cartmoove-platform-${withdrawal.id}`;
+/mnt/data/fix13/controllers/platformRevenueController.js:104:    await adminClient.from("platform_withdrawals").update({ paystack_reference: reference }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix13/controllers/platformRevenueController.js:107:      source:"balance",amount:Math.round(Number(withdrawal.amount)*100),
+/mnt/data/fix13/controllers/platformRevenueController.js:108:      recipient:recipientCode,reason:`Cartmoove platform revenue withdrawal ${withdrawal.id.slice(0,8)}`,
+/mnt/data/fix13/controllers/platformRevenueController.js:115:    await adminClient.from("platform_withdrawals").update({
+/mnt/data/fix13/controllers/platformRevenueController.js:120:    }).eq("id",withdrawal.id);
+/mnt/data/fix13/controllers/platformRevenueController.js:122:    res.json({success:true,message:"Platform payout sent to Paystack and is processing.",status:"PROCESSING"});
+/mnt/data/fix13/controllers/platformRevenueController.js:125:    const {data:current}=await adminClient.from("platform_withdrawals")
+/mnt/data/fix13/controllers/platformRevenueController.js:129:      await adminClient.from("platform_withdrawals").update({status:"PENDING"}).eq("id",req.params.id).eq("status","CLAIMED");
+/mnt/data/fix13/controllers/platformRevenueController.js:131:      await adminClient.rpc("restore_platform_balance",{p_amount:Number(current.amount)});
+/mnt/data/fix13/controllers/platformRevenueController.js:132:      await adminClient.from("platform_withdrawals").update({
+/mnt/data/fix13/controllers/platformRevenueController.js:140:module.exports={getPlatformBalance,getPlatformLedger,getPlatformWithdrawals,requestPlatformWithdrawal,approvePlatformWithdrawal};
+/mnt/data/fix13/controllers/vendorController.js:262:    // Get balance from balances table (source of truth)
+/mnt/data/fix13/controllers/vendorController.js:263:    const { data: balance } = await adminClient
+/mnt/data/fix13/controllers/vendorController.js:264:      .from("balances")
+/mnt/data/fix13/controllers/vendorController.js:265:      .select("available_balance, pending_balance, total_earned, total_withdrawn")
+/mnt/data/fix13/controllers/vendorController.js:270:      .from("refund_liabilities")
+/mnt/data/fix13/controllers/vendorController.js:271:      .select("id, refund_id, responsible_type, original_amount, recovered_amount, status, created_at, updated_at")
+/mnt/data/fix13/controllers/vendorController.js:276:    const outstanding_refund_liability = (liabilities || []).reduce((sum, x) => sum + Number(x.original_amount || 0) - Number(x.recovered_amount || 0), 0);
+/mnt/data/fix13/controllers/vendorController.js:281:      .select("id, vendor_payout, status, created_at, withdrawal_available_at, order_id")
+/mnt/data/fix13/controllers/vendorController.js:289:      available_balance: balance?.available_balance ?? 0,
+/mnt/data/fix13/controllers/vendorController.js:290:      pending_balance: balance?.pending_balance ?? 0,
+/mnt/data/fix13/controllers/vendorController.js:291:      total_earned: balance?.total_earned ?? 0,
+/mnt/data/fix13/controllers/vendorController.js:292:      total_withdrawn: balance?.total_withdrawn ?? 0,
+/mnt/data/fix13/controllers/vendorController.js:293:      outstanding_refund_liability,
+/mnt/data/fix13/controllers/vendorController.js:294:      refund_liabilities: liabilities || [],
+/mnt/data/fix13/controllers/pilotAndOpsController.js:353:        "If second attempt fails, order returned to vendor and customer refunded minus delivery fee",
+/mnt/data/fix13/controllers/withdrawalController.js:33:// Resolve the account before a withdrawal is created — the account
+/mnt/data/fix13/controllers/withdrawalController.js:81:  const { data } = await adminClient.from("fee_settings").select("withdrawal_fee_percentage, withdrawal_fee_cap").single();
+/mnt/data/fix13/controllers/withdrawalController.js:82:  return { feePercentage: data?.withdrawal_fee_percentage ?? 1, feeCap: data?.withdrawal_fee_cap ?? 2000 };
+/mnt/data/fix13/controllers/withdrawalController.js:85:const calculateWithdrawalFee = (grossAmount, feePercentage = 1, feeCap = 2000) => {
+/mnt/data/fix13/controllers/withdrawalController.js:88:  return { gross_amount: grossAmount, withdrawal_fee: cappedFee, net_payout: grossAmount - cappedFee, fee_percentage: feePercentage, fee_cap: feeCap, fee_was_capped: fee > feeCap };
+/mnt/data/fix13/controllers/withdrawalController.js:92:// WITHDRAWAL PIN
+/mnt/data/fix13/controllers/withdrawalController.js:94:// and riders must set once and then re-enter on every withdrawal
+/mnt/data/fix13/controllers/withdrawalController.js:96:// as a bcrypt hash on users.withdrawal_pin_hash, same pattern as
+/mnt/data/fix13/controllers/withdrawalController.js:105:const MIN_WITHDRAWAL_AMOUNT = 100;
+/mnt/data/fix13/controllers/withdrawalController.js:107:// @route GET /api/withdrawals/pin/status
+/mnt/data/fix13/controllers/withdrawalController.js:112:      .select("withdrawal_pin_hash")
+/mnt/data/fix13/controllers/withdrawalController.js:116:    res.json({ success: true, pin_set: !!user?.withdrawal_pin_hash });
+/mnt/data/fix13/controllers/withdrawalController.js:122:// @route POST /api/withdrawals/pin/set
+/mnt/data/fix13/controllers/withdrawalController.js:124:const setWithdrawalPin = async (req, res) => {
+/mnt/data/fix13/controllers/withdrawalController.js:133:      .select("withdrawal_pin_hash")
+/mnt/data/fix13/controllers/withdrawalController.js:138:    if (user?.withdrawal_pin_hash) {
+/mnt/data/fix13/controllers/withdrawalController.js:145:      const matches = await bcrypt.compare(String(current_pin), user.withdrawal_pin_hash);
+/mnt/data/fix13/controllers/withdrawalController.js:156:    const withdrawal_pin_hash = await bcrypt.hash(String(pin), 10);
+/mnt/data/fix13/controllers/withdrawalController.js:157:    await adminClient.from("users").update({ withdrawal_pin_hash }).eq("id", req.user.id);
+/mnt/data/fix13/controllers/withdrawalController.js:159:    res.json({ success: true, message: user?.withdrawal_pin_hash ? "Withdrawal PIN updated." : "Withdrawal PIN set." });
+/mnt/data/fix13/controllers/withdrawalController.js:166:const requestWithdrawal = async (req, res, type) => {
+/mnt/data/fix13/controllers/withdrawalController.js:169:    if (!amount || amount <= 0) return res.status(400).json({ success: false, message: "Invalid withdrawal amount." });
+/mnt/data/fix13/controllers/withdrawalController.js:170:    if (amount < MIN_WITHDRAWAL_AMOUNT) {
+/mnt/data/fix13/controllers/withdrawalController.js:171:      return res.status(400).json({ success: false, message: `Minimum withdrawal amount is ₦${MIN_WITHDRAWAL_AMOUNT}.` });
+/mnt/data/fix13/controllers/withdrawalController.js:173:    if (!bank_code) return res.status(400).json({ success: false, message: "Bank account must be verified before requesting a withdrawal." });
+/mnt/data/fix13/controllers/withdrawalController.js:175:    // Withdrawal PIN check — a separate confirmation step from the
+/mnt/data/fix13/controllers/withdrawalController.js:176:    // account password, required on every withdrawal request.
+/mnt/data/fix13/controllers/withdrawalController.js:178:      return res.status(400).json({ success: false, message: "Enter your 4-digit withdrawal PIN." });
+/mnt/data/fix13/controllers/withdrawalController.js:180:    const { data: pinUser } = await adminClient.from("users").select("withdrawal_pin_hash").eq("id", req.user.id).single();
+/mnt/data/fix13/controllers/withdrawalController.js:181:    if (!pinUser?.withdrawal_pin_hash) {
+/mnt/data/fix13/controllers/withdrawalController.js:182:      return res.status(400).json({ success: false, message: "Set up a withdrawal PIN before requesting a withdrawal." });
+/mnt/data/fix13/controllers/withdrawalController.js:184:    const pinMatches = await bcrypt.compare(String(pin), pinUser.withdrawal_pin_hash);
+/mnt/data/fix13/controllers/withdrawalController.js:187:      return res.status(400).json({ success: false, message: "Incorrect withdrawal PIN." });
+/mnt/data/fix13/controllers/withdrawalController.js:201:    const { data: pending } = await adminClient.from("withdrawals").select("id").eq("requester_id", req.user.id).eq("status", "PENDING").single();
+/mnt/data/fix13/controllers/withdrawalController.js:202:    if (pending) return res.status(400).json({ success: false, message: "You already have a pending withdrawal." });
+/mnt/data/fix13/controllers/withdrawalController.js:204:    const { data: balance } = await adminClient.from("balances").select("available_balance").eq("user_id", req.user.id).single();
+/mnt/data/fix13/controllers/withdrawalController.js:205:    const available = balance?.available_balance ?? 0;
+/mnt/data/fix13/controllers/withdrawalController.js:206:    if (amount > available) return res.status(400).json({ success: false, message: `Insufficient balance. Available: ₦${available.toLocaleString()}` });
+/mnt/data/fix13/controllers/withdrawalController.js:208:    const { data: deducted } = await adminClient.rpc("atomic_withdraw_balance", { p_user_id: req.user.id, p_amount: amount });
+/mnt/data/fix13/controllers/withdrawalController.js:209:    if (!deducted) return res.status(400).json({ success: false, message: "Balance deduction failed. Please try again." });
+/mnt/data/fix13/controllers/withdrawalController.js:212:    const { gross_amount, withdrawal_fee, net_payout, fee_was_capped } = calculateWithdrawalFee(amount, feePercentage, feeCap);
+/mnt/data/fix13/controllers/withdrawalController.js:213:    const withdrawalId = uuidv4();
+/mnt/data/fix13/controllers/withdrawalController.js:215:    const { data: withdrawalRow, error: insertError } = await adminClient.from("withdrawals").insert({
+/mnt/data/fix13/controllers/withdrawalController.js:216:      id: withdrawalId, requester_id: req.user.id, requester_type: type,
+/mnt/data/fix13/controllers/withdrawalController.js:218:      gross_amount, withdrawal_fee, net_payout, fee_percentage: feePercentage, fee_cap: feeCap, fee_was_capped,
+/mnt/data/fix13/controllers/withdrawalController.js:222:    // Previously unchecked — atomic_withdraw_balance() above already
+/mnt/data/fix13/controllers/withdrawalController.js:223:    // deducted the balance by this point. Without checking this insert,
+/mnt/data/fix13/controllers/withdrawalController.js:225:    // withdrawal" check above (now also closed at the database level by
+/mnt/data/fix13/controllers/withdrawalController.js:226:    // uq_one_pending_withdrawal_per_user) would silently deduct money
+/mnt/data/fix13/controllers/withdrawalController.js:227:    // with no withdrawal row ever created to account for it. Postgres
+/mnt/data/fix13/controllers/withdrawalController.js:231:      await adminClient.rpc("restore_balance_after_rejection", { p_user_id: req.user.id, p_amount: gross_amount });
+/mnt/data/fix13/controllers/withdrawalController.js:233:        return res.status(400).json({ success: false, message: "You already have a pending withdrawal." });
+/mnt/data/fix13/controllers/withdrawalController.js:239:      id: uuidv4(), reference: withdrawalId, type: "WITHDRAWAL_REQUEST",
+/mnt/data/fix13/controllers/withdrawalController.js:240:      amount: gross_amount, fee: withdrawal_fee, net: net_payout,
+/mnt/data/fix13/controllers/withdrawalController.js:241:      source: `${type}_balance`, destination: "withdrawal_queue", actor_id: req.user.id,
+/mnt/data/fix13/controllers/withdrawalController.js:242:      description: `${type} withdrawal request of ₦${gross_amount.toLocaleString()}`,
+/mnt/data/fix13/controllers/withdrawalController.js:250:      "New Withdrawal Request",
+/mnt/data/fix13/controllers/withdrawalController.js:251:      `${type} requested ₦${gross_amount.toLocaleString()}. Net: ₦${net_payout.toLocaleString()}`
+/mnt/data/fix13/controllers/withdrawalController.js:254:    res.status(201).json({ success: true, message: "Withdrawal request submitted.", withdrawal: { id: withdrawalId, gross_amount, withdrawal_fee, net_payout, fee_was_capped, status: "PENDING" } });
+/mnt/data/fix13/controllers/withdrawalController.js:260:const requestVendorWithdrawal = (req, res) => requestWithdrawal(req, res, "vendor");
+/mnt/data/fix13/controllers/withdrawalController.js:261:const requestRiderWithdrawal = (req, res) => requestWithdrawal(req, res, "rider");
+/mnt/data/fix13/controllers/withdrawalController.js:263:const getMyWithdrawals = async (req, res) => {
+/mnt/data/fix13/controllers/withdrawalController.js:265:    const { data, error } = await adminClient.from("withdrawals").select("id, gross_amount, withdrawal_fee, net_payout, fee_was_capped, status, requested_at, completed_at, rejection_reason").eq("requester_id", req.user.id).order("requested_at", { ascending: false });
+/mnt/data/fix13/controllers/withdrawalController.js:267:    res.json({ success: true, withdrawals: data });
+/mnt/data/fix13/controllers/withdrawalController.js:271:const getAllWithdrawals = async (req, res) => {
+/mnt/data/fix13/controllers/withdrawalController.js:274:    let query = adminClient.from("withdrawals").select("*, users!requester_id(full_name, email, phone)").order("requested_at", { ascending: true });
+/mnt/data/fix13/controllers/withdrawalController.js:278:    res.json({ success: true, withdrawals: data });
+/mnt/data/fix13/controllers/withdrawalController.js:282:const approveWithdrawal = async (req, res) => {
+/mnt/data/fix13/controllers/withdrawalController.js:284:    const { proof_of_payout } = req.body;
+/mnt/data/fix13/controllers/withdrawalController.js:290:    const { data: withdrawal } = await adminClient.from("withdrawals").select("*").eq("id", req.params.id).single();
+/mnt/data/fix13/controllers/withdrawalController.js:291:    if (!withdrawal) return res.status(404).json({ success: false, message: "Withdrawal not found." });
+/mnt/data/fix13/controllers/withdrawalController.js:292:    if (withdrawal.status !== "PENDING" && withdrawal.status !== "CLAIMED") {
+/mnt/data/fix13/controllers/withdrawalController.js:293:      return res.status(400).json({ success: false, message: "Withdrawal is not pending." });
+/mnt/data/fix13/controllers/withdrawalController.js:295:    if (!withdrawal.bank_code || !withdrawal.bank_account || !withdrawal.account_name) {
+/mnt/data/fix13/controllers/withdrawalController.js:296:      return res.status(400).json({ success: false, message: "Withdrawal has no verified bank details." });
+/mnt/data/fix13/controllers/withdrawalController.js:302:    // withdrawal afterward, so two overlapping "Approve" actions on the
+/mnt/data/fix13/controllers/withdrawalController.js:303:    // same withdrawal could both pass the plain status check above and
+/mnt/data/fix13/controllers/withdrawalController.js:305:    // for one withdrawal request — only detected, never prevented, by
+/mnt/data/fix13/controllers/withdrawalController.js:310:    const { data: alreadyClaimed } = await adminClient.from("withdrawals").select("status").eq("id", req.params.id).eq("status", "CLAIMED").maybeSingle();
+/mnt/data/fix13/controllers/withdrawalController.js:313:      const { data: claimResult, error: claimErr } = await adminClient.rpc("claim_withdrawal_for_approval", {
+/mnt/data/fix13/controllers/withdrawalController.js:314:        p_withdrawal_id: req.params.id, p_admin_id: req.user.id,
+/mnt/data/fix13/controllers/withdrawalController.js:320:      return res.status(409).json({ success: false, message: "This withdrawal is already being processed by another request." });
+/mnt/data/fix13/controllers/withdrawalController.js:324:    // leaves the withdrawal safely in CLAIMED with no transfer ever
+/mnt/data/fix13/controllers/withdrawalController.js:337:        params: { account_number: withdrawal.bank_account, bank_code: withdrawal.bank_code },
+/mnt/data/fix13/controllers/withdrawalController.js:341:      if (!resolvedName) throw new Error("Paystack could not re-verify the withdrawal account.");
+/mnt/data/fix13/controllers/withdrawalController.js:342:      if (String(resolvedName).trim().toLowerCase() !== String(withdrawal.account_name).trim().toLowerCase()) {
+/mnt/data/fix13/controllers/withdrawalController.js:343:        throw new Error("The verified account name has changed. Withdrawal requires re-verification.");
+/mnt/data/fix13/controllers/withdrawalController.js:346:      const reference = `cartmoove-withdraw-${withdrawal.id}`;
+/mnt/data/fix13/controllers/withdrawalController.js:349:        { type: "nuban", name: resolvedName, account_number: withdrawal.bank_account, bank_code: withdrawal.bank_code, currency: "NGN" },
+/mnt/data/fix13/controllers/withdrawalController.js:358:      // withdrawal.id, not randomly generated), so Paystack itself
+/mnt/data/fix13/controllers/withdrawalController.js:369:          source: "balance",
+/mnt/data/fix13/controllers/withdrawalController.js:370:          amount: Math.round(Number(withdrawal.net_payout) * 100),
+/mnt/data/fix13/controllers/withdrawalController.js:373:          reason: `Cartmoove withdrawal ${withdrawal.id.slice(0, 8)}`,
+/mnt/data/fix13/controllers/withdrawalController.js:387:      // transfer looked identical to a real success: withdrawal marked
+/mnt/data/fix13/controllers/withdrawalController.js:388:      // PROCESSING, balance already deducted, but nothing ever actually
+/mnt/data/fix13/controllers/withdrawalController.js:391:      // failure (restores balance, marks FAILED, notifies the user) instead
+/mnt/data/fix13/controllers/withdrawalController.js:392:      // of silently lying about the withdrawal's real state.
+/mnt/data/fix13/controllers/withdrawalController.js:394:        throw new Error("Paystack requires an OTP to complete this transfer. Go to your Paystack dashboard → Settings → Preferences and turn on \"Disable OTP for Transfers\", then retry this withdrawal.");
+/mnt/data/fix13/controllers/withdrawalController.js:397:      // We already own this withdrawal exclusively (the CLAIMED claim
+/mnt/data/fix13/controllers/withdrawalController.js:404:        .from("withdrawals")
+/mnt/data/fix13/controllers/withdrawalController.js:408:          proof_of_payout: proof_of_payout || null,
+/mnt/data/fix13/controllers/withdrawalController.js:416:        .eq("id", withdrawal.id)
+/mnt/data/fix13/controllers/withdrawalController.js:425:          id: uuidv4(), action: "WITHDRAWAL_APPROVE_RACE_DETECTED", actor_id: req.user.id, target_id: req.params.id,
+/mnt/data/fix13/controllers/withdrawalController.js:426:          target_type: "withdrawal", details: { paystack_transfer_id: transferData.id, note: "Transfer was initiated but the withdrawal row was no longer CLAIMED when we tried to record it — check Paystack dashboard for this transfer manually." },
+/mnt/data/fix13/controllers/withdrawalController.js:428:        return res.status(409).json({ success: false, message: "This withdrawal's state changed unexpectedly. A Paystack transfer may have been initiated — please check the Paystack dashboard before retrying." });
+/mnt/data/fix13/controllers/withdrawalController.js:431:      // Withdrawal-fee revenue is no longer credited here — see
+/mnt/data/fix13/controllers/withdrawalController.js:437:        id: uuidv4(), action: "WITHDRAWAL_APPROVED", actor_id: req.user.id, target_id: req.params.id, target_type: "withdrawal",
+/mnt/data/fix13/controllers/withdrawalController.js:438:        details: { gross_amount: withdrawal.gross_amount, net_payout: withdrawal.net_payout, paystack_reference: reference },
+/mnt/data/fix13/controllers/withdrawalController.js:441:        id: uuidv4(), user_id: withdrawal.requester_id, title: "Withdrawal Processing",
+/mnt/data/fix13/controllers/withdrawalController.js:442:        body: `Your withdrawal of ₦${Number(withdrawal.net_payout).toLocaleString()} has been sent to Paystack and is being processed.`, is_read: false,
+/mnt/data/fix13/controllers/withdrawalController.js:445:      res.json({ success: true, message: "Withdrawal sent to Paystack and is processing.", status: "PROCESSING" });
+/mnt/data/fix13/controllers/withdrawalController.js:449:        // withdrawal back for a clean retry rather than leaving it
+/mnt/data/fix13/controllers/withdrawalController.js:451:        await adminClient.from("withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix13/controllers/withdrawalController.js:463:          id: uuidv4(), action: "WITHDRAWAL_APPROVE_UNCERTAIN_OUTCOME", actor_id: req.user.id, target_id: req.params.id,
+/mnt/data/fix13/controllers/withdrawalController.js:464:          target_type: "withdrawal", details: { error: innerErr.message, note: "Transfer call was attempted but its outcome is unknown. Left CLAIMED for reconciliation." },
+/mnt/data/fix13/controllers/withdrawalController.js:473:    // recipient, insufficient Paystack balance, minimum-amount rejection,
+/mnt/data/fix13/controllers/withdrawalController.js:474:    // etc.), the withdrawal row is still PENDING and the requester's app
+/mnt/data/fix13/controllers/withdrawalController.js:475:    // balance was already deducted atomically at request time. Without this,
+/mnt/data/fix13/controllers/withdrawalController.js:476:    // that money is stuck deducted with no transfer and no way to withdraw
+/mnt/data/fix13/controllers/withdrawalController.js:477:    // again (requestWithdrawal blocks a second request while one is still
+/mnt/data/fix13/controllers/withdrawalController.js:478:    // PENDING) — same rollback pattern as approvePlatformWithdrawal.
+/mnt/data/fix13/controllers/withdrawalController.js:480:      .from("withdrawals")
+/mnt/data/fix13/controllers/withdrawalController.js:486:      await adminClient.rpc("restore_balance_after_rejection", {
+/mnt/data/fix13/controllers/withdrawalController.js:491:        .from("withdrawals")
+/mnt/data/fix13/controllers/withdrawalController.js:502:        title: "Withdrawal Failed",
+/mnt/data/fix13/controllers/withdrawalController.js:503:        body: `Your withdrawal could not be processed: ${message}. Your balance has been restored.`,
+/mnt/data/fix13/controllers/withdrawalController.js:512:const rejectWithdrawal = async (req, res) => {
+/mnt/data/fix13/controllers/withdrawalController.js:517:    const { data: withdrawal } = await adminClient.from("withdrawals").select("requester_id, gross_amount, status").eq("id", req.params.id).single();
+/mnt/data/fix13/controllers/withdrawalController.js:518:    if (!withdrawal) return res.status(404).json({ success: false, message: "Withdrawal not found." });
+/mnt/data/fix13/controllers/withdrawalController.js:519:    if (withdrawal.status !== "PENDING") return res.status(400).json({ success: false, message: "Withdrawal is not pending." });
+/mnt/data/fix13/controllers/withdrawalController.js:521:    await adminClient.from("withdrawals").update({ status: "REJECTED", rejection_reason: reason, admin_reviewer_id: req.user.id, reviewed_at: new Date().toISOString() }).eq("id", req.params.id);
+/mnt/data/fix13/controllers/withdrawalController.js:523:    // Restore balance since we deducted atomically on request
+/mnt/data/fix13/controllers/withdrawalController.js:524:    await adminClient.rpc("restore_balance_after_rejection", { p_user_id: withdrawal.requester_id, p_amount: withdrawal.gross_amount });
+/mnt/data/fix13/controllers/withdrawalController.js:526:    await adminClient.from("notifications").insert({ id: uuidv4(), user_id: withdrawal.requester_id, title: "Withdrawal Rejected", body: `Your withdrawal was rejected. Reason: ${reason}. Your balance has been restored.`, is_read: false });
+/mnt/data/fix13/controllers/withdrawalController.js:527:    await adminClient.from("audit_logs").insert({ id: uuidv4(), action: "WITHDRAWAL_REJECTED", actor_id: req.user.id, target_id: req.params.id, target_type: "withdrawal", details: { reason } });
+/mnt/data/fix13/controllers/withdrawalController.js:529:    res.json({ success: true, message: "Withdrawal rejected and balance restored." });
+/mnt/data/fix13/controllers/withdrawalController.js:538:    res.json({ success: true, breakdown: calculateWithdrawalFee(amount, feePercentage, feeCap) });
+/mnt/data/fix13/controllers/withdrawalController.js:544:    const { withdrawal_fee_percentage, withdrawal_fee_cap } = req.body;
+/mnt/data/fix13/controllers/withdrawalController.js:547:      await adminClient.from("fee_settings").update({ withdrawal_fee_percentage, withdrawal_fee_cap, updated_by: req.user.id, updated_at: new Date().toISOString() }).eq("id", existing.id);
+/mnt/data/fix13/controllers/withdrawalController.js:549:      await adminClient.from("fee_settings").insert({ id: uuidv4(), withdrawal_fee_percentage, withdrawal_fee_cap, updated_by: req.user.id });
+/mnt/data/fix13/controllers/withdrawalController.js:551:    await adminClient.from("audit_logs").insert({ id: uuidv4(), action: "FEE_SETTINGS_UPDATED", actor_id: req.user.id, target_type: "fee_settings", details: { withdrawal_fee_percentage, withdrawal_fee_cap } });
+/mnt/data/fix13/controllers/withdrawalController.js:556:module.exports = { getBanks, resolveAccount, requestVendorWithdrawal, requestRiderWithdrawal, getMyWithdrawals, getAllWithdrawals, approveWithdrawal, rejectWithdrawal, getFeePreview, updateFeeSettings, getPinStatus, setWithdrawalPin };
+/mnt/data/fix13/controllers/promotionsController.js:8:// Admin view: current balance + a recent activity trail. Everything
+/mnt/data/fix13/controllers/promotionsController.js:16:      .select("balance, total_deposited, total_spent, updated_at")
+/mnt/data/fix13/controllers/promotionsController.js:162:// referral payouts later). Returns true only if the spend actually
+/mnt/data/fix13/controllers/promotionsController.js:163:// went through against a real, sufficient balance; false means the
+/mnt/data/fix13/controllers/promotionsController.js:183:const refundToPromotionsBudget = async ({ reference, type }) => {
+/mnt/data/fix13/controllers/promotionsController.js:184:  const { data: success } = await adminClient.rpc("refund_promotions_budget", {
+/mnt/data/fix13/controllers/promotionsController.js:211:  refundToPromotionsBudget,
+/mnt/data/fix13/controllers/operationalController.js:5:const { refundToPromotionsBudget } = require("./promotionsController");
+/mnt/data/fix13/controllers/operationalController.js:56:          email_withdrawal_updates: true,
+/mnt/data/fix13/controllers/operationalController.js:80:      "email_order_updates", "email_payment_updates", "email_withdrawal_updates",
+/mnt/data/fix13/controllers/operationalController.js:108:// SECTION 7 — REFUND RESPONSIBILITY MATRIX
+/mnt/data/fix13/controllers/operationalController.js:111:const REFUND_RULES = {
+/mnt/data/fix13/controllers/operationalController.js:115:    deducted_from: "vendor_balance",
+/mnt/data/fix13/controllers/operationalController.js:122:    deducted_from: "rider_balance",
+/mnt/data/fix13/controllers/operationalController.js:142:// @route POST /api/refunds (admin only)
+/mnt/data/fix13/controllers/operationalController.js:143:const getRefundPayment = async (orderId) => {
+/mnt/data/fix13/controllers/operationalController.js:157:const findRefundSubOrder = async (orderId, subOrderId) => {
+/mnt/data/fix13/controllers/operationalController.js:161:      .select("id, order_id, subtotal, platform_fee, delivery_fee, delivery_margin, vendor_payout, rider_payout, vendor_id, rider_id, status")
+/mnt/data/fix13/controllers/operationalController.js:171:    .select("id, order_id, subtotal, platform_fee, delivery_fee, delivery_margin, vendor_payout, rider_payout, vendor_id, rider_id, status")
+/mnt/data/fix13/controllers/operationalController.js:177:    throw new Error("This order contains multiple sub-orders. Select the affected sub-order before issuing a refund.");
+/mnt/data/fix13/controllers/operationalController.js:182:const executeRefund = async ({
+/mnt/data/fix13/controllers/operationalController.js:187:  refund_type = "full",
+/mnt/data/fix13/controllers/operationalController.js:192:  refund_stage = "post_delivery", // "pre_delivery" (cancellation) or "post_delivery" (dispute)
+/mnt/data/fix13/controllers/operationalController.js:195:  if (!REFUND_RULES[fault_party]) throw new Error("Invalid fault_party.");
+/mnt/data/fix13/controllers/operationalController.js:196:  if (!reason?.trim()) throw new Error("A refund reason is required.");
+/mnt/data/fix13/controllers/operationalController.js:198:  // Idempotency short-circuit: a retried cancellation request, a
+/mnt/data/fix13/controllers/operationalController.js:200:  // same key gets back the existing refund instead of creating a
+/mnt/data/fix13/controllers/operationalController.js:204:      .from("refunds").select("*").eq("idempotency_key", idempotency_key).maybeSingle();
+/mnt/data/fix13/controllers/operationalController.js:205:    if (existing) return { refund: existing, payment: null, subOrder: null, already_existed: true };
+/mnt/data/fix13/controllers/operationalController.js:208:  const payment = await getRefundPayment(order_id);
+/mnt/data/fix13/controllers/operationalController.js:209:  const subOrder = await findRefundSubOrder(order_id, sub_order_id);
+/mnt/data/fix13/controllers/operationalController.js:217:  if (customer_id && order.customer_id !== customer_id) throw new Error("Refund customer does not match the order.");
+/mnt/data/fix13/controllers/operationalController.js:220:  // WHOLE multi-vendor order, but a sub-order's "full refund" only ever
+/mnt/data/fix13/controllers/operationalController.js:221:  // means a full refund of THIS sub-order's own share — its subtotal,
+/mnt/data/fix13/controllers/operationalController.js:227:  // below for "full" refunds — which told Paystack to refund the
+/mnt/data/fix13/controllers/operationalController.js:234:  const requestedAmount = refund_type === "partial" ? Number(partial_amount) : subOrderFullAmount;
+/mnt/data/fix13/controllers/operationalController.js:236:    throw new Error("Refund amount must be greater than zero.");
+/mnt/data/fix13/controllers/operationalController.js:240:  // a single conditional UPDATE with a row lock (claim_refund_amount,
+/mnt/data/fix13/controllers/operationalController.js:242:  // read-the-previous-refunds-then-check-then-insert sequence, which
+/mnt/data/fix13/controllers/operationalController.js:243:  // was a genuine TOCTOU race under concurrent refund requests. It also
+/mnt/data/fix13/controllers/operationalController.js:245:  // refunding sub-order B and then sub-order C from the same ₦17,500
+/mnt/data/fix13/controllers/operationalController.js:248:  const { data: claimedAmount, error: claimError } = await adminClient.rpc("claim_refund_amount", {
+/mnt/data/fix13/controllers/operationalController.js:254:    throw new Error("This refund would exceed the amount originally paid — nothing left to refund on this transaction.");
+/mnt/data/fix13/controllers/operationalController.js:258:  const refundId = uuidv4();
+/mnt/data/fix13/controllers/operationalController.js:259:  const { data: refund, error: insertError } = await adminClient
+/mnt/data/fix13/controllers/operationalController.js:260:    .from("refunds")
+/mnt/data/fix13/controllers/operationalController.js:262:      id: refundId,
+/mnt/data/fix13/controllers/operationalController.js:271:      refund_type,
+/mnt/data/fix13/controllers/operationalController.js:272:      partial_amount: refund_type === "partial" ? amount : null,
+/mnt/data/fix13/controllers/operationalController.js:273:      deducted_from: REFUND_RULES[fault_party].deducted_from,
+/mnt/data/fix13/controllers/operationalController.js:276:      refund_stage,
+/mnt/data/fix13/controllers/operationalController.js:283:    // Couldn't record the refund at all — release the amount we just
+/mnt/data/fix13/controllers/operationalController.js:285:    // refunded by a request that never actually happened.
+/mnt/data/fix13/controllers/operationalController.js:286:    await adminClient.rpc("release_refund_claim", { p_payment_id: payment.id, p_amount: amount });
+/mnt/data/fix13/controllers/operationalController.js:292:      "https://api.paystack.co/refund",
+/mnt/data/fix13/controllers/operationalController.js:296:        // omitted. This is what stops a one-sub-order refund from ever
+/mnt/data/fix13/controllers/operationalController.js:297:        // refunding the entire parent Paystack transaction.
+/mnt/data/fix13/controllers/operationalController.js:300:        customer_note: `Fidelx refund for order ${order_id.slice(0, 8)}`,
+/mnt/data/fix13/controllers/operationalController.js:301:        merchant_note: `Fidelx refund ${refundId.slice(0, 8)} — ${reason.trim()}`,
+/mnt/data/fix13/controllers/operationalController.js:311:    const paystackRefund = paystackResponse.data?.data;
+/mnt/data/fix13/controllers/operationalController.js:312:    const paystackStatus = paystackRefund?.status || "pending";
+/mnt/data/fix13/controllers/operationalController.js:315:      .from("refunds")
+/mnt/data/fix13/controllers/operationalController.js:320:        paystack_refund_id: paystackRefund?.id ? String(paystackRefund.id) : null,
+/mnt/data/fix13/controllers/operationalController.js:324:      .eq("id", refundId);
+/mnt/data/fix13/controllers/operationalController.js:331:      title: "Refund Initiated",
+/mnt/data/fix13/controllers/operationalController.js:332:      body: `A refund of ₦${amount.toLocaleString()} has been initiated and sent to Paystack. It can take several business days to reflect on your original payment method.`,
+/mnt/data/fix13/controllers/operationalController.js:336:    return { refund: { ...refund, status: paystackStatus, paystack_refund_id: paystackRefund?.id }, payment, subOrder };
+/mnt/data/fix13/controllers/operationalController.js:339:    await adminClient.from("refunds").update({
+/mnt/data/fix13/controllers/operationalController.js:344:    }).eq("id", refundId);
+/mnt/data/fix13/controllers/operationalController.js:345:    // The refund never actually went through on Paystack's side —
+/mnt/data/fix13/controllers/operationalController.js:347:    // payment's cap and block a legitimate future refund attempt.
+/mnt/data/fix13/controllers/operationalController.js:348:    await adminClient.rpc("release_refund_claim", { p_payment_id: payment.id, p_amount: amount });
+/mnt/data/fix13/controllers/operationalController.js:349:    throw new Error(`Paystack refund failed: ${paystackMessage}`);
+/mnt/data/fix13/controllers/operationalController.js:354:// PRE-DELIVERY CANCELLATION REFUND
+/mnt/data/fix13/controllers/operationalController.js:356:// been paid for (payment_status === "successful") is cancelled — by
+/mnt/data/fix13/controllers/operationalController.js:359:// post-delivery dispute refund: at this stage nothing has been paid
+/mnt/data/fix13/controllers/operationalController.js:360:// out to the vendor yet (vendor_payout only credits at DELIVERED), so
+/mnt/data/fix13/controllers/operationalController.js:361:// there is no available_balance to claw back, only platform revenue
+/mnt/data/fix13/controllers/operationalController.js:365:const initiatePreDeliveryCancellationRefund = async ({ subOrder, initiatedByRole, initiatedByUserId }) => {
+/mnt/data/fix13/controllers/operationalController.js:366:  // fault_party here is recorded for reporting only ("who cancelled")
+/mnt/data/fix13/controllers/operationalController.js:367:  // — no strike/penalty is applied for a pre-delivery cancellation
+/mnt/data/fix13/controllers/operationalController.js:368:  // regardless of this value (see finalizeProcessedRefund). Inventing
+/mnt/data/fix13/controllers/operationalController.js:369:  // a new penalty policy for cancellations wasn't part of what was
+/mnt/data/fix13/controllers/operationalController.js:370:  // asked; only making the refund actually happen was.
+/mnt/data/fix13/controllers/operationalController.js:373:  return executeRefund({
+/mnt/data/fix13/controllers/operationalController.js:377:    refund_type: "full",
+/mnt/data/fix13/controllers/operationalController.js:378:    reason: `Order cancelled by ${initiatedByRole} before vendor preparation.`,
+/mnt/data/fix13/controllers/operationalController.js:380:    refund_stage: "pre_delivery",
+/mnt/data/fix13/controllers/operationalController.js:381:    // A given sub-order can only ever be cancelled once (CANCELLED is
+/mnt/data/fix13/controllers/operationalController.js:384:    // were somehow invoked twice for the same cancellation, only one
+/mnt/data/fix13/controllers/operationalController.js:385:    // refund is ever created or sent to Paystack.
+/mnt/data/fix13/controllers/operationalController.js:386:    idempotency_key: `cancel:${subOrder.id}`,
+/mnt/data/fix13/controllers/operationalController.js:390:// Apply the accounting side only after Paystack confirms the refund was
+/mnt/data/fix13/controllers/operationalController.js:391:// actually processed. This prevents a queued/failed refund from reducing
+/mnt/data/fix13/controllers/operationalController.js:392:// a vendor/rider balance prematurely.
+/mnt/data/fix13/controllers/operationalController.js:393:const finalizeProcessedRefund = async (refundId) => {
+/mnt/data/fix13/controllers/operationalController.js:394:  // Paystack has confirmed the customer refund. Financial accounting is
+/mnt/data/fix13/controllers/operationalController.js:397:  const { data: result, error: financialError } = await adminClient.rpc("apply_refund_financials", {
+/mnt/data/fix13/controllers/operationalController.js:398:    p_refund_id: refundId,
+/mnt/data/fix13/controllers/operationalController.js:401:  if (!result) throw new Error("Refund financial finalization returned no result.");
+/mnt/data/fix13/controllers/operationalController.js:403:  const { data: refund, error } = await adminClient
+/mnt/data/fix13/controllers/operationalController.js:404:    .from("refunds")
+/mnt/data/fix13/controllers/operationalController.js:405:    .select("id, order_id, sub_order_id, payment_id, customer_id, amount, refund_type, refund_stage, fault_party, deducted_from, status, admin_reviewer_id, reason")
+/mnt/data/fix13/controllers/operationalController.js:406:    .eq("id", refundId)
+/mnt/data/fix13/controllers/operationalController.js:408:  if (error || !refund) throw new Error("Refund record not found after financial finalization.");
+/mnt/data/fix13/controllers/operationalController.js:414:  // Keep order/payment state synchronized with the confirmed refund.
+/mnt/data/fix13/controllers/operationalController.js:415:  if (refund.refund_stage === "post_delivery" && refund.refund_type === "full" && refund.sub_order_id) {
+/mnt/data/fix13/controllers/operationalController.js:416:    await adminClient.from("sub_orders").update({ status: "REFUNDED" }).eq("id", refund.sub_order_id);
+/mnt/data/fix13/controllers/operationalController.js:418:  if (refund.payment_id) {
+/mnt/data/fix13/controllers/operationalController.js:419:    const { data: payment } = await adminClient.from("payments").select("amount,total_refunded").eq("id", refund.payment_id).single();
+/mnt/data/fix13/controllers/operationalController.js:420:    if (payment && Number(payment.total_refunded) >= Number(payment.amount) - 0.000001) {
+/mnt/data/fix13/controllers/operationalController.js:421:      await adminClient.from("payments").update({ status: "refunded" }).eq("id", refund.payment_id);
+/mnt/data/fix13/controllers/operationalController.js:425:  // A full pre-delivery cancellation means this order never became a
+/mnt/data/fix13/controllers/operationalController.js:428:  // (customer/vendor cancelling before prep, instead of payment never
+/mnt/data/fix13/controllers/operationalController.js:434:  // dispute/partial refund means the sale genuinely happened, so the
+/mnt/data/fix13/controllers/operationalController.js:438:  // sub-order's cancellation is always the whole order's cancellation
+/mnt/data/fix13/controllers/operationalController.js:442:  if (refund.refund_stage === "pre_delivery" && refund.refund_type === "full") {
+/mnt/data/fix13/controllers/operationalController.js:444:      await refundToPromotionsBudget({ reference: refund.order_id, type: "COUPON_DISCOUNT" });
+/mnt/data/fix13/controllers/operationalController.js:445:      await adminClient.rpc("reverse_coupon_redemption", { p_order_id: refund.order_id });
+/mnt/data/fix13/controllers/operationalController.js:447:      console.error(`[refund] Failed to reverse coupon effects for cancelled order ${refund.order_id}:`, err.message);
+/mnt/data/fix13/controllers/operationalController.js:452:  if (refund.refund_stage === "post_delivery" && (refund.fault_party === "vendor" || refund.fault_party === "rider")) {
+/mnt/data/fix13/controllers/operationalController.js:453:    if (refund.fault_party === "vendor") {
+/mnt/data/fix13/controllers/operationalController.js:454:      const { data: subOrder } = await adminClient.from("sub_orders").select("vendor_id").eq("id", refund.sub_order_id).single();
+/mnt/data/fix13/controllers/operationalController.js:460:      const { data: subOrder } = await adminClient.from("sub_orders").select("rider_id").eq("id", refund.sub_order_id).single();
+/mnt/data/fix13/controllers/operationalController.js:474:    user_id: refund.customer_id,
+/mnt/data/fix13/controllers/operationalController.js:475:    title: "Refund Completed",
+/mnt/data/fix13/controllers/operationalController.js:476:    body: `Your refund of ₦${Number(refund.amount).toLocaleString()} has been processed through Paystack.`,
+/mnt/data/fix13/controllers/operationalController.js:484:  const refundAmount = Number(refund.amount || 0);
+/mnt/data/fix13/controllers/operationalController.js:486:  // Tell the party whose balance/liability bears the refund cost.
+/mnt/data/fix13/controllers/operationalController.js:488:  // explains the reduction in withdrawable funds without rewriting that total.
+/mnt/data/fix13/controllers/operationalController.js:492:      ? "Refund Recovery — Funds Deducted"
+/mnt/data/fix13/controllers/operationalController.js:493:      : "Refund Responsibility — Recovery Pending";
+/mnt/data/fix13/controllers/operationalController.js:495:      ? `A ₦${refundAmount.toLocaleString()} customer refund was assigned to you because you were found responsible for the issue (${refund.reason}). ₦${recoveredNow.toLocaleString()} has been recovered from your available ${partyLabel} earnings. Remaining refund liability: ₦${Math.max(outstanding, 0).toLocaleString()}.`
+/mnt/data/fix13/controllers/operationalController.js:496:      : `A ₦${refundAmount.toLocaleString()} customer refund was assigned to you because you were found responsible for the issue (${refund.reason}). Your current available balance was insufficient, so the outstanding ₦${Math.max(outstanding, 0).toLocaleString()} refund liability will be recovered from future earnings.`;
+/mnt/data/fix13/controllers/operationalController.js:507:  // Platform-funded refunds are a Fidelx loss, so notify every real admin
+/mnt/data/fix13/controllers/operationalController.js:511:      "Platform Refund Cost",
+/mnt/data/fix13/controllers/operationalController.js:512:      `A ₦${refundAmount.toLocaleString()} customer refund was finalized as a Fidelx/platform responsibility. This amount is a platform cash expense for refund ${refund.id}. Reason: ${refund.reason}`
+/mnt/data/fix13/controllers/operationalController.js:516:  return refund;
+/mnt/data/fix13/controllers/operationalController.js:519:// @route POST /api/refunds (admin only)
+/mnt/data/fix13/controllers/operationalController.js:520:const processRefund = async (req, res) => {
+/mnt/data/fix13/controllers/operationalController.js:522:    const result = await executeRefund({
+/mnt/data/fix13/controllers/operationalController.js:529:      message: `Refund initiated for ₦${Number(result.refund.amount).toLocaleString()}. Paystack status: ${result.refund.status}.`,
+/mnt/data/fix13/controllers/operationalController.js:530:      refund_id: result.refund.id,
+/mnt/data/fix13/controllers/operationalController.js:531:      refund_status: result.refund.status,
+/mnt/data/fix13/controllers/operationalController.js:538:// @route GET /api/refunds/rules (public reference)
+/mnt/data/fix13/controllers/operationalController.js:539:const getRefundRules = async (req, res) => {
+/mnt/data/fix13/controllers/operationalController.js:540:  res.json({ success: true, rules: REFUND_RULES });
+/mnt/data/fix13/controllers/operationalController.js:547:  processRefund,
+/mnt/data/fix13/controllers/operationalController.js:548:  executeRefund,
+/mnt/data/fix13/controllers/operationalController.js:549:  finalizeProcessedRefund,
+/mnt/data/fix13/controllers/operationalController.js:550:  initiatePreDeliveryCancellationRefund,
+/mnt/data/fix13/controllers/operationalController.js:551:  getRefundRules,
+/mnt/data/fix13/controllers/reconciliationController.js:4:const { processSuccessfulPayment, applyPaymentSideEffects, completeVendorRiderWithdrawal, failVendorRiderWithdrawal } = require("./paymentController");
+/mnt/data/fix13/controllers/reconciliationController.js:6:const { finalizeProcessedRefund } = require("./operationalController");
+/mnt/data/fix13/controllers/reconciliationController.js:7:const { refundToPromotionsBudget } = require("./promotionsController");
+/mnt/data/fix13/controllers/reconciliationController.js:11:// paid-too-late-then-refunded) — undoes every coupon side-effect that
+/mnt/data/fix13/controllers/reconciliationController.js:20:    await refundToPromotionsBudget({ reference: order.id, type: "COUPON_DISCOUNT" });
+/mnt/data/fix13/controllers/reconciliationController.js:39:// longer be available — so it's refunded instead of fulfilled.
+/mnt/data/fix13/controllers/reconciliationController.js:52:// A refund here has no vendor/rider fault — nobody was ever paid out
+/mnt/data/fix13/controllers/reconciliationController.js:54:// mirrors operationalController's existing "platform fault" refund
+/mnt/data/fix13/controllers/reconciliationController.js:55:// path (REFUND_RULES.platform: "Technical error, payment failure,
+/mnt/data/fix13/controllers/reconciliationController.js:56:// system bug" — this is exactly that). Reuses the same refunds-table
+/mnt/data/fix13/controllers/reconciliationController.js:59:// refund.processed/refund.failed and calls finalizeProcessedRefund) —
+/mnt/data/fix13/controllers/reconciliationController.js:60:// this does NOT mark the refund "processed" itself; Paystack's own
+/mnt/data/fix13/controllers/reconciliationController.js:61:// webhook does that asynchronously, same as every other refund in
+/mnt/data/fix13/controllers/reconciliationController.js:63:const issueAutomaticRefund = async (order, payment) => {
+/mnt/data/fix13/controllers/reconciliationController.js:64:  const refundId = uuidv4();
+/mnt/data/fix13/controllers/reconciliationController.js:67:  const { data: claimedAmount, error: claimError } = await adminClient.rpc("claim_refund_amount", {
+/mnt/data/fix13/controllers/reconciliationController.js:72:    console.error(`[reconciliation] Could not reserve refund amount for order ${order.id}:`, claimError?.message || "refund cap already consumed");
+/mnt/data/fix13/controllers/reconciliationController.js:73:    await notifyAdmins("Charged order needs manual refund", `Order ${order.id} was charged after its abandonment window, but its refund amount could not be reserved safely.`);
+/mnt/data/fix13/controllers/reconciliationController.js:77:  const { error: insertError } = await adminClient.from("refunds").insert({
+/mnt/data/fix13/controllers/reconciliationController.js:78:    id: refundId,
+/mnt/data/fix13/controllers/reconciliationController.js:84:    reason: "Payment succeeded after this order's abandonment window — order could not be safely fulfilled and was refunded automatically.",
+/mnt/data/fix13/controllers/reconciliationController.js:87:    refund_type: "full",
+/mnt/data/fix13/controllers/reconciliationController.js:91:    refund_stage: "pre_delivery",
+/mnt/data/fix13/controllers/reconciliationController.js:95:    await adminClient.rpc("release_refund_claim", { p_payment_id: payment.id, p_amount: amount });
+/mnt/data/fix13/controllers/reconciliationController.js:96:    console.error(`[reconciliation] Failed to create refund record for order ${order.id}:`, insertError.message);
+/mnt/data/fix13/controllers/reconciliationController.js:98:      "Charged order needs manual refund",
+/mnt/data/fix13/controllers/reconciliationController.js:99:      `Order ${order.id} was charged (ref ${payment.paystack_reference}) after its abandonment window, but creating the automatic refund record failed. Needs manual handling.`
+/mnt/data/fix13/controllers/reconciliationController.js:106:      "https://api.paystack.co/refund",
+/mnt/data/fix13/controllers/reconciliationController.js:111:        customer_note: `Fidelx refund for order ${order.id.slice(0, 8)}`,
+/mnt/data/fix13/controllers/reconciliationController.js:112:        merchant_note: `Automatic reconciliation refund ${refundId.slice(0, 8)} — order too old to fulfill after a late-arriving payment success.`,
+/mnt/data/fix13/controllers/reconciliationController.js:117:      "Charged order auto-refunded",
+/mnt/data/fix13/controllers/reconciliationController.js:118:      `Order ${order.id} was charged after its abandonment window. A refund was automatically issued via Paystack — no action needed unless it fails.`
+/mnt/data/fix13/controllers/reconciliationController.js:121:    console.error(`[reconciliation] Paystack refund call failed for order ${order.id}:`, err.response?.data || err.message);
+/mnt/data/fix13/controllers/reconciliationController.js:123:      "Charged order — automatic refund FAILED",
+/mnt/data/fix13/controllers/reconciliationController.js:124:      `Order ${order.id} was charged after its abandonment window, and the automatic Paystack refund attempt failed. This needs manual review and a manual refund.`
+/mnt/data/fix13/controllers/reconciliationController.js:222:        // refund automatically rather than leaving a charged customer's
+/mnt/data/fix13/controllers/reconciliationController.js:227:        await issueAutomaticRefund(order, payment);
+/mnt/data/fix13/controllers/reconciliationController.js:236:    // charge to keep and which to refund needs a human, since silently
+/mnt/data/fix13/controllers/reconciliationController.js:252:      `Order ${order.id} has ${successfulPayments.length} successful Paystack charges. This needs manual review to decide which charge to keep and refund the rest — check audit_logs for the full reference list.`
+/mnt/data/fix13/controllers/reconciliationController.js:260:// STUCK REFUND RECONCILIATION
+/mnt/data/fix13/controllers/reconciliationController.js:261:// Safety net for finalizeProcessedRefund's normal path (the
+/mnt/data/fix13/controllers/reconciliationController.js:262:// paystackWebhook handler reacting to refund.processed) — covers the
+/mnt/data/fix13/controllers/reconciliationController.js:263:// case where Paystack's webhook for a specific refund is dropped,
+/mnt/data/fix13/controllers/reconciliationController.js:264:// delayed, or never successfully delivered. Without this, a refund
+/mnt/data/fix13/controllers/reconciliationController.js:266:// indefinitely, with the responsible vendor/rider's balance never
+/mnt/data/fix13/controllers/reconciliationController.js:269:const REFUND_STUCK_CHECK_AGE_MINUTES = 30;
+/mnt/data/fix13/controllers/reconciliationController.js:271:const reconcileStuckRefunds = async () => {
+/mnt/data/fix13/controllers/reconciliationController.js:272:  const cutoff = new Date(Date.now() - REFUND_STUCK_CHECK_AGE_MINUTES * 60 * 1000).toISOString();
+/mnt/data/fix13/controllers/reconciliationController.js:274:  const { data: stuckRefunds, error } = await adminClient
+/mnt/data/fix13/controllers/reconciliationController.js:275:    .from("refunds")
+/mnt/data/fix13/controllers/reconciliationController.js:276:    .select("id, paystack_refund_id, status, created_at")
+/mnt/data/fix13/controllers/reconciliationController.js:278:    .not("paystack_refund_id", "is", null)
+/mnt/data/fix13/controllers/reconciliationController.js:282:  if (!stuckRefunds?.length) return { checked: 0, finalized: 0, failed: 0 };
+/mnt/data/fix13/controllers/reconciliationController.js:287:  for (const refund of stuckRefunds) {
+/mnt/data/fix13/controllers/reconciliationController.js:290:        `https://api.paystack.co/refund/${refund.paystack_refund_id}`,
+/mnt/data/fix13/controllers/reconciliationController.js:296:        await adminClient.from("refunds").update({
+/mnt/data/fix13/controllers/reconciliationController.js:300:        }).eq("id", refund.id);
+/mnt/data/fix13/controllers/reconciliationController.js:301:        await finalizeProcessedRefund(refund.id);
+/mnt/data/fix13/controllers/reconciliationController.js:304:        await adminClient.from("refunds").update({
+/mnt/data/fix13/controllers/reconciliationController.js:307:          failure_reason: "Reconciliation: Paystack reports this refund failed.",
+/mnt/data/fix13/controllers/reconciliationController.js:309:        }).eq("id", refund.id);
+/mnt/data/fix13/controllers/reconciliationController.js:311:      } else if (paystackStatus && paystackStatus !== refund.status) {
+/mnt/data/fix13/controllers/reconciliationController.js:312:        await adminClient.from("refunds").update({ paystack_status: paystackStatus }).eq("id", refund.id);
+/mnt/data/fix13/controllers/reconciliationController.js:315:      console.error(`[reconcile-refunds] Failed to check refund ${refund.id}:`, err.response?.data || err.message);
+/mnt/data/fix13/controllers/reconciliationController.js:317:        "Refund reconciliation check failed",
+/mnt/data/fix13/controllers/reconciliationController.js:318:        `Refund ${refund.id} could not be verified against Paystack automatically. Needs manual review.`
+/mnt/data/fix13/controllers/reconciliationController.js:325:  return { checked: stuckRefunds.length, finalized, failed };
+/mnt/data/fix13/controllers/reconciliationController.js:379:// STUCK WITHDRAWAL CLAIM RECOVERY (item 5's crash-recovery requirement)
+/mnt/data/fix13/controllers/reconciliationController.js:380:// A withdrawal stuck in CLAIMED past a reasonable window means either:
+/mnt/data/fix13/controllers/reconciliationController.js:387:// The deterministic reference (cartmoove-withdraw-<id>) is what makes
+/mnt/data/fix13/controllers/reconciliationController.js:392:const WITHDRAWAL_CLAIM_STUCK_AGE_MINUTES = 15;
+/mnt/data/fix13/controllers/reconciliationController.js:394:const reconcileStuckWithdrawalClaims = async () => {
+/mnt/data/fix13/controllers/reconciliationController.js:395:  const cutoff = new Date(Date.now() - WITHDRAWAL_CLAIM_STUCK_AGE_MINUTES * 60 * 1000).toISOString();
+/mnt/data/fix13/controllers/reconciliationController.js:398:    .from("withdrawals")
+/mnt/data/fix13/controllers/reconciliationController.js:408:  for (const withdrawal of stuck) {
+/mnt/data/fix13/controllers/reconciliationController.js:409:    const reference = `cartmoove-withdraw-${withdrawal.id}`;
+/mnt/data/fix13/controllers/reconciliationController.js:422:        const { data: moved, error: moveError } = await adminClient.from("withdrawals").update({
+/mnt/data/fix13/controllers/reconciliationController.js:428:        }).eq("id", withdrawal.id).eq("status", "CLAIMED").select("id").maybeSingle();
+/mnt/data/fix13/controllers/reconciliationController.js:432:          // The webhook may have arrived before approveWithdrawal finished
+/mnt/data/fix13/controllers/reconciliationController.js:436:          await completeVendorRiderWithdrawal({ ...withdrawal, account_name: withdrawal.account_name || "bank account", withdrawal_fee: withdrawal.withdrawal_fee || 0, net_payout: withdrawal.net_payout || 0 }, transferData.status);
+/mnt/data/fix13/controllers/reconciliationController.js:438:          await failVendorRiderWithdrawal(withdrawal, transferData.status, transferData.reason || `Paystack transfer ${transferData.status}`);
+/mnt/data/fix13/controllers/reconciliationController.js:443:        await adminClient.from("withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix13/controllers/reconciliationController.js:450:        await adminClient.from("withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix13/controllers/reconciliationController.js:453:        console.error(`[reconcile-withdrawals] Could not check stuck claim ${withdrawal.id}:`, err.response?.data || err.message);
+/mnt/data/fix13/controllers/reconciliationController.js:455:          "Stuck withdrawal claim could not be reconciled",
+/mnt/data/fix13/controllers/reconciliationController.js:456:          `Withdrawal ${withdrawal.id} has been stuck CLAIMED and could not be automatically verified against Paystack (${err.message}). Needs manual review before any retry.`
+/mnt/data/fix13/controllers/reconciliationController.js:464:    .from("platform_withdrawals")
+/mnt/data/fix13/controllers/reconciliationController.js:470:  for (const withdrawal of (platformStuck || [])) {
+/mnt/data/fix13/controllers/reconciliationController.js:471:    const reference = withdrawal.paystack_reference || `cartmoove-platform-${withdrawal.id}`;
+/mnt/data/fix13/controllers/reconciliationController.js:480:          .from("platform_withdrawals")
+/mnt/data/fix13/controllers/reconciliationController.js:486:          .eq("id", withdrawal.id).eq("status", "CLAIMED")
+/mnt/data/fix13/controllers/reconciliationController.js:493:            await adminClient.rpc("complete_platform_withdrawal", {
+/mnt/data/fix13/controllers/reconciliationController.js:494:              p_withdrawal_id: withdrawal.id, p_admin_id: null
+/mnt/data/fix13/controllers/reconciliationController.js:497:            await adminClient.rpc("fail_platform_withdrawal", {
+/mnt/data/fix13/controllers/reconciliationController.js:498:              p_withdrawal_id: withdrawal.id,
+/mnt/data/fix13/controllers/reconciliationController.js:505:        await adminClient.from("platform_withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix13/controllers/reconciliationController.js:510:        await adminClient.from("platform_withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix13/controllers/reconciliationController.js:513:        await notifyAdmins("Stuck platform withdrawal claim could not be reconciled", `Platform withdrawal ${withdrawal.id} could not be verified against Paystack: ${err.message}. Manual review is required before retry.`);
+/mnt/data/fix13/controllers/reconciliationController.js:521:module.exports = { reconcileStalePayments, reconcileStuckRefunds, reconcileIncompletePaymentProcessing, reconcileStuckWithdrawalClaims };
+/mnt/data/fix13/supabase/reverse_coupon_redemption_on_void.sql:6:--   - FAILED_BUT_CHARGED, fully auto-refunded (paid too late, voided)
+/mnt/data/fix13/supabase/reverse_coupon_redemption_on_void.sql:13:--   1. promotions_budget spend was never refunded
+/mnt/data/fix13/supabase/reverse_coupon_redemption_on_void.sql:20:-- disputes/partial refunds (the sale genuinely happened) or
+/mnt/data/fix13/supabase/reverse_coupon_redemption_on_void.sql:21:-- multi-vendor partial cancellations (ambiguous — see conversation
+/mnt/data/fix13/supabase/close_rls_gap_migration.sql:19:--   platform_accounts, platform_ledger_entries, platform_withdrawals
+/mnt/data/fix13/supabase/close_rls_gap_migration.sql:29:ALTER TABLE platform_withdrawals ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix13/supabase/operational_migrations.sql:155:  email_withdrawal_updates BOOLEAN DEFAULT TRUE,
+/mnt/data/fix13/supabase/operational_migrations.sql:169:-- SECTION 7: REFUND RESPONSIBILITY MATRIX
+/mnt/data/fix13/supabase/operational_migrations.sql:172:ALTER TABLE refunds
+/mnt/data/fix13/supabase/operational_migrations.sql:175:  ADD COLUMN IF NOT EXISTS refund_type TEXT DEFAULT 'full'
+/mnt/data/fix13/supabase/operational_migrations.sql:176:    CHECK (refund_type IN ('full', 'partial')),
+/mnt/data/fix13/supabase/operational_migrations.sql:241:    'terms_of_service', 'privacy_policy', 'refund_policy',
+/mnt/data/fix13/supabase/operational_migrations.sql:267:  (gen_random_uuid(), 'refund_policy', 'Refund Policy', 'Refund policy content goes here.', '1.0'),
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:16:  available_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:17:  pending_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:19:  total_withdrawn NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:46:  'WITHDRAWAL_FEE_EARNED'
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:82:        'WITHDRAWAL_FEE_EARNED'
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:106:        'WITHDRAWAL_FEE_EARNED'
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:118:      available_balance = available_balance + v_total,
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:132:-- 4. Correct withdrawal-fee revenue function too, since it uses the
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:134:CREATE OR REPLACE FUNCTION credit_withdrawal_fee_revenue(
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:152:      'WITHDRAWAL_FEE_EARNED',
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:154:      'Withdrawal fee earned',
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:161:      'WITHDRAWAL_FEE_EARNED'
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:171:    available_balance = available_balance + p_amount,
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:248:  pa.available_balance,
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:250:  pa.total_withdrawn,
+/mnt/data/fix13/supabase/platform_revenue_fix_v2.sql:260:GROUP BY pa.id, pa.available_balance, pa.total_earned, pa.total_withdrawn;
+/mnt/data/fix13/supabase/reconcile_financial_safety_migration.sql:6:-- existing reconcile-stale-payments / reconcile-stuck-refunds jobs —
+/mnt/data/fix13/supabase/reconcile_financial_safety_migration.sql:30:-- Item 5: resolve withdrawals stuck CLAIMED by a crash mid-approval.
+/mnt/data/fix13/supabase/reconcile_financial_safety_migration.sql:32:  'reconcile-withdrawal-claims',
+/mnt/data/fix13/supabase/reconcile_financial_safety_migration.sql:36:    url := 'https://fidelx-backend.onrender.com/api/withdrawals/reconcile-internal',
+/mnt/data/fix13/supabase/reconcile_financial_safety_migration.sql:48:--   SELECT * FROM cron.job WHERE jobname IN ('reconcile-payment-processing','reconcile-withdrawal-claims');
+/mnt/data/fix13/supabase/financial_safety_migration.sql:13:-- Atomic cumulative refund cap against the parent Paystack transaction.
+/mnt/data/fix13/supabase/financial_safety_migration.sql:14:ALTER TABLE payments ADD COLUMN IF NOT EXISTS total_refunded NUMERIC NOT NULL DEFAULT 0;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:23:-- Refund idempotency + the fields the current code already relies on
+/mnt/data/fix13/supabase/financial_safety_migration.sql:26:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS idempotency_key TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:27:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS payment_id UUID REFERENCES payments(id);
+/mnt/data/fix13/supabase/financial_safety_migration.sql:28:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS refund_type TEXT DEFAULT 'full';
+/mnt/data/fix13/supabase/financial_safety_migration.sql:29:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS fault_party TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:30:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS deducted_from TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:31:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS balance_debited BOOLEAN DEFAULT FALSE;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:32:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS paystack_refund_id TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:33:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS paystack_status TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:34:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS paystack_transaction_reference TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:35:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS processed_at TIMESTAMPTZ;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:36:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS failed_at TIMESTAMPTZ;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:37:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS failure_reason TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:38:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS admin_reviewer_id UUID REFERENCES users(id);
+/mnt/data/fix13/supabase/financial_safety_migration.sql:39:-- NEW: distinguishes "cancelled before anyone was ever paid" from
+/mnt/data/fix13/supabase/financial_safety_migration.sql:41:-- — the two cases need different accounting (see debit_refund_shares
+/mnt/data/fix13/supabase/financial_safety_migration.sql:43:-- logic for pre-delivery cancellation" requirement.
+/mnt/data/fix13/supabase/financial_safety_migration.sql:44:ALTER TABLE refunds ADD COLUMN IF NOT EXISTS refund_stage TEXT DEFAULT 'post_delivery';
+/mnt/data/fix13/supabase/financial_safety_migration.sql:46:CREATE UNIQUE INDEX IF NOT EXISTS uq_refunds_idempotency_key
+/mnt/data/fix13/supabase/financial_safety_migration.sql:47:ON refunds(idempotency_key) WHERE idempotency_key IS NOT NULL;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:49:-- Widen the refunds status CHECK to match every status the code
+/mnt/data/fix13/supabase/financial_safety_migration.sql:60:    WHERE rel.relname = 'refunds' AND con.contype = 'c'
+/mnt/data/fix13/supabase/financial_safety_migration.sql:63:    EXECUTE format('ALTER TABLE refunds DROP CONSTRAINT %I', r.conname);
+/mnt/data/fix13/supabase/financial_safety_migration.sql:66:ALTER TABLE refunds ADD CONSTRAINT refunds_status_check
+/mnt/data/fix13/supabase/financial_safety_migration.sql:69:-- Withdrawals: add a CLAIMED state — the withdrawal is atomically
+/mnt/data/fix13/supabase/financial_safety_migration.sql:79:    WHERE rel.relname = 'withdrawals' AND con.contype = 'c'
+/mnt/data/fix13/supabase/financial_safety_migration.sql:82:    EXECUTE format('ALTER TABLE withdrawals DROP CONSTRAINT %I', r.conname);
+/mnt/data/fix13/supabase/financial_safety_migration.sql:85:ALTER TABLE withdrawals ADD CONSTRAINT withdrawals_status_check
+/mnt/data/fix13/supabase/financial_safety_migration.sql:88:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS paystack_transfer_id TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:89:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS paystack_transfer_code TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:90:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS paystack_reference TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:91:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS paystack_status TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:92:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS paystack_recipient_code TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:93:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS failure_reason TEXT;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:94:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:95:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMPTZ;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:96:-- Withdrawal-fee revenue is now only booked once the transfer is
+/mnt/data/fix13/supabase/financial_safety_migration.sql:98:-- idempotent the same way balance_debited does for refunds.
+/mnt/data/fix13/supabase/financial_safety_migration.sql:99:ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS fee_revenue_credited BOOLEAN DEFAULT FALSE;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:101:CREATE UNIQUE INDEX IF NOT EXISTS uq_withdrawals_paystack_reference
+/mnt/data/fix13/supabase/financial_safety_migration.sql:102:ON withdrawals(paystack_reference) WHERE paystack_reference IS NOT NULL;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:105:-- dispute concurrently can't both initiate a refund.
+/mnt/data/fix13/supabase/financial_safety_migration.sql:134:-- 2. IDEMPOTENT PER-SUB-ORDER PAYOUT TRACKING (item 4, and the
+/mnt/data/fix13/supabase/financial_safety_migration.sql:140:-- refund/cancellation reversal path read and write through this table
+/mnt/data/fix13/supabase/financial_safety_migration.sql:141:-- instead of trusting sub_orders.vendor_payout/rider_payout directly,
+/mnt/data/fix13/supabase/financial_safety_migration.sql:144:CREATE TABLE IF NOT EXISTS sub_order_payouts (
+/mnt/data/fix13/supabase/financial_safety_migration.sql:152:  reversal_reference UUID, -- the refund.id that reversed this credit
+/mnt/data/fix13/supabase/financial_safety_migration.sql:157:-- 3. DELIVERY CREDIT — replaces the old plain credit_pending_balance
+/mnt/data/fix13/supabase/financial_safety_migration.sql:161:--    the sub_order_payouts UNIQUE constraint (INSERT ... ON CONFLICT).
+/mnt/data/fix13/supabase/financial_safety_migration.sql:163:CREATE OR REPLACE FUNCTION credit_delivery_payout(
+/mnt/data/fix13/supabase/financial_safety_migration.sql:170:  INSERT INTO sub_order_payouts (sub_order_id, role, user_id, amount)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:177:  -- FOUND is false, so the balance credit below never fires twice.
+/mnt/data/fix13/supabase/financial_safety_migration.sql:181:    INSERT INTO balances (id, user_id, pending_balance, total_earned)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:184:    SET pending_balance = balances.pending_balance + p_amount,
+/mnt/data/fix13/supabase/financial_safety_migration.sql:185:        total_earned = balances.total_earned + p_amount,
+/mnt/data/fix13/supabase/financial_safety_migration.sql:194:-- 4. CLAIM AN ATOMIC SLICE OF THE PARENT PAYMENT FOR REFUND
+/mnt/data/fix13/supabase/financial_safety_migration.sql:199:-- UPDATEs to the same row, so two simultaneous refund requests against
+/mnt/data/fix13/supabase/financial_safety_migration.sql:200:-- the same payment cannot both read a stale total_refunded and both
+/mnt/data/fix13/supabase/financial_safety_migration.sql:202:-- one's already-committed total_refunded and is evaluated against it.
+/mnt/data/fix13/supabase/financial_safety_migration.sql:206:CREATE OR REPLACE FUNCTION claim_refund_amount(
+/mnt/data/fix13/supabase/financial_safety_migration.sql:218:  SELECT amount, total_refunded INTO v_payment_amount, v_before
+/mnt/data/fix13/supabase/financial_safety_migration.sql:227:  -- this is the guard that makes "refund B and C from the same
+/mnt/data/fix13/supabase/financial_safety_migration.sql:232:  UPDATE payments SET total_refunded = total_refunded + v_claim WHERE id = p_payment_id;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:239:-- call itself fails after the amount was reserved, or when a refund
+/mnt/data/fix13/supabase/financial_safety_migration.sql:240:-- is later voided) — the exact inverse of claim_refund_amount.
+/mnt/data/fix13/supabase/financial_safety_migration.sql:241:CREATE OR REPLACE FUNCTION release_refund_claim(
+/mnt/data/fix13/supabase/financial_safety_migration.sql:248:  SET total_refunded = GREATEST(0, total_refunded - p_amount)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:254:-- 5. FINALIZE A CONFIRMED REFUND — atomic claim + correct reversal
+/mnt/data/fix13/supabase/financial_safety_migration.sql:257:-- Atomically claims the refund with an UPDATE ... WHERE
+/mnt/data/fix13/supabase/financial_safety_migration.sql:258:-- balance_debited = FALSE — a duplicate refund.processed webhook (or
+/mnt/data/fix13/supabase/financial_safety_migration.sql:262:-- already used for payments.status and withdrawals.status elsewhere
+/mnt/data/fix13/supabase/financial_safety_migration.sql:265:CREATE OR REPLACE FUNCTION claim_refund_finalization(p_refund_id UUID)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:270:  UPDATE refunds SET balance_debited = TRUE
+/mnt/data/fix13/supabase/financial_safety_migration.sql:271:  WHERE id = p_refund_id AND balance_debited = FALSE;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:277:-- Reverses exactly what sub_order_payouts says was actually paid out
+/mnt/data/fix13/supabase/financial_safety_migration.sql:281:-- match the real Paystack-refunded amount instead of an
+/mnt/data/fix13/supabase/financial_safety_migration.sql:288:CREATE OR REPLACE FUNCTION reverse_sub_order_payouts(p_sub_order_id UUID, p_refund_id UUID, p_roles TEXT[] DEFAULT NULL)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:293:    SELECT * FROM sub_order_payouts
+/mnt/data/fix13/supabase/financial_safety_migration.sql:295:      AND (p_roles IS NULL OR sub_order_payouts.role = ANY(p_roles))
+/mnt/data/fix13/supabase/financial_safety_migration.sql:302:      -- to fully claw back this specific credit; balances are allowed
+/mnt/data/fix13/supabase/financial_safety_migration.sql:304:      UPDATE balances
+/mnt/data/fix13/supabase/financial_safety_migration.sql:305:      SET pending_balance = pending_balance - LEAST(r.amount, GREATEST(pending_balance,0)),
+/mnt/data/fix13/supabase/financial_safety_migration.sql:306:          available_balance = available_balance - (r.amount - LEAST(r.amount, GREATEST(pending_balance,0))),
+/mnt/data/fix13/supabase/financial_safety_migration.sql:311:      SET available_balance = available_balance - r.amount,
+/mnt/data/fix13/supabase/financial_safety_migration.sql:317:    UPDATE sub_order_payouts SET reversed_at = NOW(), reversal_reference = p_refund_id WHERE id = r.id;
+/mnt/data/fix13/supabase/financial_safety_migration.sql:326:-- 6. WITHDRAWAL-FEE REVENUE timing (item 6)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:327:-- credit_withdrawal_fee_revenue() already exists (see
+/mnt/data/fix13/supabase/financial_safety_migration.sql:328:-- withdrawal_fee_revenue_migration.sql) and is already idempotent via
+/mnt/data/fix13/supabase/financial_safety_migration.sql:330:-- What changes is WHEN withdrawalController.js calls it: moved from
+/mnt/data/fix13/supabase/financial_safety_migration.sql:332:-- there). withdrawals.fee_revenue_credited above is a cheap pre-check
+/mnt/data/fix13/supabase/financial_safety_migration.sql:339:-- 7. WITHDRAWAL CLAIM BEFORE ANY PAYSTACK CALL (item 5)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:343:CREATE OR REPLACE FUNCTION claim_withdrawal_for_approval(p_withdrawal_id UUID, p_admin_id UUID)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:348:  UPDATE withdrawals
+/mnt/data/fix13/supabase/financial_safety_migration.sql:350:  WHERE id = p_withdrawal_id AND status = 'PENDING';
+/mnt/data/fix13/supabase/financial_safety_migration.sql:357:-- 8. DISPUTE CLAIM BEFORE REFUND (item 8)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:373:--    claim, used specifically for DELIVERED and CANCELLED (the two
+/mnt/data/fix13/supabase/financial_safety_migration.sql:390:-- 10. PLATFORM WITHDRAWAL DOUBLE-COUNT FIX (item 11)
+/mnt/data/fix13/supabase/financial_safety_migration.sql:392:CREATE OR REPLACE FUNCTION complete_platform_withdrawal(
+/mnt/data/fix13/supabase/financial_safety_migration.sql:393:  p_withdrawal_id UUID, p_admin_id UUID
+/mnt/data/fix13/supabase/financial_safety_migration.sql:399:  -- webhook for the same platform withdrawal now hits zero matching
+/mnt/data/fix13/supabase/financial_safety_migration.sql:401:  UPDATE platform_withdrawals
+/mnt/data/fix13/supabase/financial_safety_migration.sql:403:  WHERE id = p_withdrawal_id AND status = 'PROCESSING'
+/mnt/data/fix13/supabase/financial_safety_migration.sql:410:  SET total_withdrawn = total_withdrawn + v_amount, updated_at = NOW()
+/mnt/data/fix13/supabase/financial_safety_migration.sql:484:      subtotal, platform_fee, delivery_fee, delivery_margin, vendor_payout,
+/mnt/data/fix13/supabase/financial_safety_migration.sql:485:      rider_payout, withdrawal_available_at
+/mnt/data/fix13/supabase/financial_safety_migration.sql:494:      (v_group->>'vendor_payout')::NUMERIC, (v_group->>'rider_payout')::NUMERIC,
+/mnt/data/fix13/supabase/financial_safety_migration.sql:495:      (v_group->>'withdrawal_available_at')::TIMESTAMPTZ;
+/mnt/data/fix13/supabase/customer_referral_migration.sql:10:-- manually reward with a coupon — no automatic payout, so there's a
+/mnt/data/fix13/supabase/money_architecture_v2.sql:5:-- withdrawal_fee_revenue_migration.sql and settlement_hold_migration.sql.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:8:--   1. Paystack customer refunds are funded by the platform cash account.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:10:--      of reversing unrelated parties' payouts.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:11:--   3. Insufficient balance never blocks the customer refund; the remainder
+/mnt/data/fix13/supabase/money_architecture_v2.sql:13:--   4. Refund financial finalization is ONE database transaction. If it
+/mnt/data/fix13/supabase/money_architecture_v2.sql:14:--      fails, balance_debited remains FALSE and reconciliation can retry.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:15:--   5. Platform-fault refunds reduce earned revenue; fault-party refunds are
+/mnt/data/fix13/supabase/money_architecture_v2.sql:17:--   6. Platform withdrawals are atomically claimed before any Paystack call.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:21:  ADD COLUMN IF NOT EXISTS recoverable_refunds NUMERIC(14,2) NOT NULL DEFAULT 0;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:23:ALTER TABLE platform_withdrawals
+/mnt/data/fix13/supabase/money_architecture_v2.sql:26:ALTER TABLE platform_withdrawals
+/mnt/data/fix13/supabase/money_architecture_v2.sql:27:  DROP CONSTRAINT IF EXISTS platform_withdrawals_status_check;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:28:ALTER TABLE platform_withdrawals
+/mnt/data/fix13/supabase/money_architecture_v2.sql:29:  ADD CONSTRAINT platform_withdrawals_status_check
+/mnt/data/fix13/supabase/money_architecture_v2.sql:32:ALTER TABLE refunds
+/mnt/data/fix13/supabase/money_architecture_v2.sql:35:CREATE TABLE IF NOT EXISTS refund_liabilities (
+/mnt/data/fix13/supabase/money_architecture_v2.sql:37:  refund_id UUID NOT NULL UNIQUE REFERENCES refunds(id),
+/mnt/data/fix13/supabase/money_architecture_v2.sql:47:CREATE INDEX IF NOT EXISTS idx_refund_liabilities_user_status
+/mnt/data/fix13/supabase/money_architecture_v2.sql:48:  ON refund_liabilities(responsible_user_id, status, created_at);
+/mnt/data/fix13/supabase/money_architecture_v2.sql:50:CREATE UNIQUE INDEX IF NOT EXISTS uq_platform_refund_event
+/mnt/data/fix13/supabase/money_architecture_v2.sql:52:  WHERE source_type IN ('PLATFORM_REFUND','PLATFORM_REFUND_FRONTED');
+/mnt/data/fix13/supabase/money_architecture_v2.sql:54:CREATE UNIQUE INDEX IF NOT EXISTS uq_platform_refund_recovery
+/mnt/data/fix13/supabase/money_architecture_v2.sql:56:  WHERE source_type = 'REFUND_RECOVERY';
+/mnt/data/fix13/supabase/money_architecture_v2.sql:58:-- Recover outstanding vendor/rider refund liabilities from available balance.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:60:-- money; the separate liability explains why it is no longer withdrawable.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:61:CREATE OR REPLACE FUNCTION recover_refund_liabilities(
+/mnt/data/fix13/supabase/money_architecture_v2.sql:75:    SELECT * FROM refund_liabilities
+/mnt/data/fix13/supabase/money_architecture_v2.sql:86:    UPDATE balances
+/mnt/data/fix13/supabase/money_architecture_v2.sql:87:    SET available_balance = available_balance - v_take,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:90:      AND available_balance >= v_take;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:93:    UPDATE refund_liabilities
+/mnt/data/fix13/supabase/money_architecture_v2.sql:100:    SET available_balance = available_balance + v_take,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:101:        recoverable_refunds = GREATEST(recoverable_refunds - v_take, 0),
+/mnt/data/fix13/supabase/money_architecture_v2.sql:106:    VALUES (li.id, 'REFUND_RECOVERY', v_take,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:107:            'Recovery of refund fronted by Fidelx from responsible ' || li.responsible_type,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:109:    ON CONFLICT (reference, source_type) WHERE source_type = 'REFUND_RECOVERY' DO UPDATE
+/mnt/data/fix13/supabase/money_architecture_v2.sql:120:-- Credit delivery payout and immediately consume any existing liability.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:121:CREATE OR REPLACE FUNCTION credit_delivery_payout(
+/mnt/data/fix13/supabase/money_architecture_v2.sql:129:  INSERT INTO sub_order_payouts (sub_order_id, role, user_id, amount)
+/mnt/data/fix13/supabase/money_architecture_v2.sql:136:    INSERT INTO balances (id, user_id, pending_balance, total_earned)
+/mnt/data/fix13/supabase/money_architecture_v2.sql:139:    SET pending_balance = balances.pending_balance + p_amount,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:140:        total_earned = balances.total_earned + p_amount,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:144:    -- They remain non-withdrawable until the liability is satisfied.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:145:    FOR v_recovery IN SELECT LEAST(p_amount, COALESCE(b.pending_balance,0))
+/mnt/data/fix13/supabase/money_architecture_v2.sql:146:      FROM balances b WHERE b.user_id = p_user_id FOR UPDATE
+/mnt/data/fix13/supabase/money_architecture_v2.sql:152:      -- Reuse the liability ordering, but pending balance needs its own
+/mnt/data/fix13/supabase/money_architecture_v2.sql:153:      -- recovery path because available_balance is not yet withdrawable.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:159:        FOR li IN SELECT * FROM refund_liabilities
+/mnt/data/fix13/supabase/money_architecture_v2.sql:168:          UPDATE balances SET pending_balance = pending_balance - v_take, updated_at = NOW() WHERE user_id = p_user_id;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:169:          UPDATE refund_liabilities SET recovered_amount = recovered_amount + v_take,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:172:          UPDATE platform_accounts SET available_balance = available_balance + v_take,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:173:            recoverable_refunds = GREATEST(recoverable_refunds - v_take,0), updated_at = NOW()
+/mnt/data/fix13/supabase/money_architecture_v2.sql:176:          VALUES(li.id,'REFUND_RECOVERY',v_take,'Recovery of refund fronted by Fidelx from future ' || li.responsible_type || ' earnings')
+/mnt/data/fix13/supabase/money_architecture_v2.sql:177:          ON CONFLICT (reference, source_type) WHERE source_type = 'REFUND_RECOVERY' DO UPDATE SET amount = platform_ledger_entries.amount + EXCLUDED.amount;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:188:-- Release matured balances using actual sub_order_payouts, not the payout
+/mnt/data/fix13/supabase/money_architecture_v2.sql:190:CREATE OR REPLACE FUNCTION release_matured_sub_order_balances()
+/mnt/data/fix13/supabase/money_architecture_v2.sql:200:      AND withdrawal_available_at IS NOT NULL
+/mnt/data/fix13/supabase/money_architecture_v2.sql:201:      AND withdrawal_available_at <= NOW()
+/mnt/data/fix13/supabase/money_architecture_v2.sql:202:      AND balance_released_at IS NULL
+/mnt/data/fix13/supabase/money_architecture_v2.sql:205:    FOR p IN SELECT * FROM sub_order_payouts WHERE sub_order_id=so.id AND role IN ('vendor','rider') FOR UPDATE LOOP
+/mnt/data/fix13/supabase/money_architecture_v2.sql:207:        UPDATE balances
+/mnt/data/fix13/supabase/money_architecture_v2.sql:208:        SET pending_balance = GREATEST(pending_balance - p.amount,0),
+/mnt/data/fix13/supabase/money_architecture_v2.sql:209:            available_balance = available_balance + p.amount,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:213:        PERFORM recover_refund_liabilities(p.user_id, p.amount);
+/mnt/data/fix13/supabase/money_architecture_v2.sql:216:    UPDATE sub_orders SET balance_released_at=NOW() WHERE id=so.id;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:223:-- The single financial transaction for a confirmed Paystack refund.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:224:CREATE OR REPLACE FUNCTION apply_refund_financials(p_refund_id UUID)
+/mnt/data/fix13/supabase/money_architecture_v2.sql:227:  r refunds%ROWTYPE;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:234:  SELECT * INTO r FROM refunds WHERE id=p_refund_id FOR UPDATE;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:235:  IF NOT FOUND THEN RAISE EXCEPTION 'Refund record not found'; END IF;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:237:  IF r.balance_debited IS TRUE THEN
+/mnt/data/fix13/supabase/money_architecture_v2.sql:238:    RETURN jsonb_build_object('already_finalized',true,'refund_id',p_refund_id);
+/mnt/data/fix13/supabase/money_architecture_v2.sql:241:  -- Every confirmed customer refund is a real cash outflow from Fidelx.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:251:  SELECT available_balance INTO v_platform_before FROM platform_accounts
+/mnt/data/fix13/supabase/money_architecture_v2.sql:255:  -- refund. Internal accounting must therefore reflect the cash outflow
+/mnt/data/fix13/supabase/money_architecture_v2.sql:257:  -- withdrawal or another unreconciled cash event. A negative available
+/mnt/data/fix13/supabase/money_architecture_v2.sql:258:  -- balance is an explicit deficit, not money we silently lose.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:260:  SET available_balance = available_balance - r.amount,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:262:      recoverable_refunds = CASE WHEN v_responsible_type IS NOT NULL THEN recoverable_refunds + r.amount ELSE recoverable_refunds END,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:269:    CASE WHEN v_responsible_type IS NULL THEN 'PLATFORM_REFUND' ELSE 'PLATFORM_REFUND_FRONTED' END,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:271:    CASE WHEN v_responsible_type IS NULL THEN 'Platform-funded customer refund' ELSE 'Refund fronted by Fidelx; recoverable from responsible ' || v_responsible_type END,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:274:  ON CONFLICT (reference, source_type) WHERE source_type IN ('PLATFORM_REFUND','PLATFORM_REFUND_FRONTED') DO NOTHING;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:277:    INSERT INTO refund_liabilities(refund_id,responsible_type,responsible_user_id,original_amount)
+/mnt/data/fix13/supabase/money_architecture_v2.sql:279:    ON CONFLICT (refund_id) DO NOTHING
+/mnt/data/fix13/supabase/money_architecture_v2.sql:283:      SELECT id INTO v_liability_id FROM refund_liabilities WHERE refund_id=r.id;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:287:    v_recovered := recover_refund_liabilities(v_user_id, r.amount);
+/mnt/data/fix13/supabase/money_architecture_v2.sql:291:  VALUES(gen_random_uuid(),r.id,'REFUND_PROCESSED',r.amount,0,-r.amount,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:292:    CASE WHEN v_responsible_type IS NULL THEN 'platform_revenue' ELSE 'platform_refund_fronted' END,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:293:    'customer_refund',r.admin_reviewer_id,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:294:    'Customer refund confirmed by Paystack; cost classification: ' || COALESCE(v_responsible_type,'platform') ||
+/mnt/data/fix13/supabase/money_architecture_v2.sql:298:  UPDATE refunds SET balance_debited=TRUE, financial_finalized_at=NOW(), status='processed', processed_at=COALESCE(processed_at,NOW()), paystack_status='processed'
+/mnt/data/fix13/supabase/money_architecture_v2.sql:303:    'refund_id',r.id,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:313:-- Platform withdrawal approval lock.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:314:CREATE OR REPLACE FUNCTION claim_platform_withdrawal_for_approval(p_withdrawal_id UUID,p_admin_id UUID)
+/mnt/data/fix13/supabase/money_architecture_v2.sql:318:  UPDATE platform_withdrawals
+/mnt/data/fix13/supabase/money_architecture_v2.sql:320:  WHERE id=p_withdrawal_id AND status='PENDING';
+/mnt/data/fix13/supabase/money_architecture_v2.sql:327:CREATE OR REPLACE FUNCTION complete_platform_withdrawal(p_withdrawal_id UUID,p_admin_id UUID)
+/mnt/data/fix13/supabase/money_architecture_v2.sql:331:  UPDATE platform_withdrawals
+/mnt/data/fix13/supabase/money_architecture_v2.sql:333:  WHERE id=p_withdrawal_id AND status IN ('CLAIMED','PROCESSING')
+/mnt/data/fix13/supabase/money_architecture_v2.sql:336:  UPDATE platform_accounts SET total_withdrawn=total_withdrawn+v_amount, updated_at=NOW()
+/mnt/data/fix13/supabase/money_architecture_v2.sql:342:-- Make the original platform refund helper use the same cash/revenue rules.
+/mnt/data/fix13/supabase/money_architecture_v2.sql:343:CREATE OR REPLACE FUNCTION debit_platform_refund(p_reference UUID,p_amount NUMERIC,p_actor_id UUID,p_reason TEXT)
+/mnt/data/fix13/supabase/money_architecture_v2.sql:347:  IF EXISTS (SELECT 1 FROM platform_ledger_entries WHERE reference=p_reference AND source_type='PLATFORM_REFUND') THEN RETURN TRUE; END IF;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:349:  SET available_balance=available_balance-p_amount,
+/mnt/data/fix13/supabase/money_architecture_v2.sql:352:  WHERE id='00000000-0000-0000-0000-000000000001' AND available_balance>=p_amount;
+/mnt/data/fix13/supabase/money_architecture_v2.sql:355:  VALUES(p_reference,'PLATFORM_REFUND',-p_amount,COALESCE(p_reason,'Platform-funded refund'),p_actor_id)
+/mnt/data/fix13/supabase/money_architecture_v2.sql:356:  ON CONFLICT (reference,source_type) WHERE source_type IN ('PLATFORM_REFUND','PLATFORM_REFUND_FRONTED') DO NOTHING;
+/mnt/data/fix13/supabase/referral_reward_coupon_restriction.sql:6:-- amounts, platform fees, vendor payouts, balances, or Paystack logic.
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:4:-- WHY: vendor/rider balances were credited straight to
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:5:-- available_balance the instant a delivery completed, with no
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:6:-- connection to withdrawal_available_at (set to delivered_at + 24h)
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:8:-- in Paystack yet. A withdrawal could be requested and approved
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:9:-- before the real money existed in your Paystack balance — safe now
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:11:-- withdrawals, especially after weekends (Paystack's T+1 settlement
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:14:-- pending_balance already existed as a column and was already
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:20:-- Tracks which sub-orders have already had their payout moved from
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:22:ALTER TABLE sub_orders ADD COLUMN IF NOT EXISTS balance_released_at TIMESTAMPTZ;
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:24:-- Atomic credit into pending_balance (replaces the old upsertBalance
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:28:CREATE OR REPLACE FUNCTION credit_pending_balance(p_user_id UUID, p_amount NUMERIC)
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:34:  INSERT INTO balances (id, user_id, pending_balance, total_earned)
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:37:  SET pending_balance = balances.pending_balance + p_amount,
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:38:      total_earned = balances.total_earned + p_amount,
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:43:-- Moves matured payouts from pending to available. Safe to run as
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:44:-- often as you like — balance_released_at guards against double-moving
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:45:-- the same sub-order's payout.
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:46:CREATE OR REPLACE FUNCTION release_matured_sub_order_balances()
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:54:    SELECT sub_orders.id, sub_orders.vendor_payout, sub_orders.rider_payout,
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:60:      AND sub_orders.withdrawal_available_at IS NOT NULL
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:61:      AND sub_orders.withdrawal_available_at <= NOW()
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:62:      AND sub_orders.balance_released_at IS NULL
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:64:    IF so.vendor_user_id IS NOT NULL AND COALESCE(so.vendor_payout, 0) > 0 THEN
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:65:      UPDATE balances
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:66:      SET pending_balance = GREATEST(pending_balance - so.vendor_payout, 0),
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:67:          available_balance = available_balance + so.vendor_payout,
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:72:    IF so.rider_user_id IS NOT NULL AND COALESCE(so.rider_payout, 0) > 0 THEN
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:73:      UPDATE balances
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:74:      SET pending_balance = GREATEST(pending_balance - so.rider_payout, 0),
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:75:          available_balance = available_balance + so.rider_payout,
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:80:    UPDATE sub_orders SET balance_released_at = NOW() WHERE id = so.id;
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:93:  'release-matured-balances',
+/mnt/data/fix13/supabase/settlement_hold_migration.sql:95:  $$SELECT release_matured_sub_order_balances();$$
+/mnt/data/fix13/supabase/withdrawal_pin_migration.sql:2:-- WITHDRAWAL PIN — MIGRATION
+/mnt/data/fix13/supabase/withdrawal_pin_migration.sql:5:-- WHY: vendors and riders must set a 4-digit withdrawal PIN and
+/mnt/data/fix13/supabase/withdrawal_pin_migration.sql:6:-- enter it on every withdrawal request, as an extra confirmation
+/mnt/data/fix13/supabase/withdrawal_pin_migration.sql:11:-- withdrawals.requester_id already references users.id directly for
+/mnt/data/fix13/supabase/withdrawal_pin_migration.sql:12:-- both requester types (see withdrawalController.requestWithdrawal).
+/mnt/data/fix13/supabase/withdrawal_pin_migration.sql:17:ALTER TABLE users ADD COLUMN IF NOT EXISTS withdrawal_pin_hash TEXT;
+/mnt/data/fix13/supabase/coupon_multivendor_fix.sql:4:-- This migration does NOT modify orders, payments, balances, Paystack,
+/mnt/data/fix13/supabase/coupon_multivendor_fix.sql:5:-- inventory, refunds, promotions funding, vendors, riders, or coupon usage
+/mnt/data/fix13/supabase/platform_revenue.sql:6:  available_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/platform_revenue.sql:7:  pending_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/platform_revenue.sql:9:  total_withdrawn NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/platform_revenue.sql:34:CREATE TABLE IF NOT EXISTS platform_withdrawals (
+/mnt/data/fix13/supabase/platform_revenue.sql:54:CREATE INDEX IF NOT EXISTS idx_platform_withdrawals_status
+/mnt/data/fix13/supabase/platform_revenue.sql:55:ON platform_withdrawals(status);
+/mnt/data/fix13/supabase/platform_revenue.sql:77:    ON CONFLICT (reference,source_type) WHERE source_type IN ('PLATFORM_FEE_EARNED','DELIVERY_MARGIN_EARNED','WITHDRAWAL_FEE_EARNED')
+/mnt/data/fix13/supabase/platform_revenue.sql:86:    ON CONFLICT (reference,source_type) WHERE source_type IN ('PLATFORM_FEE_EARNED','DELIVERY_MARGIN_EARNED','WITHDRAWAL_FEE_EARNED')
+/mnt/data/fix13/supabase/platform_revenue.sql:93:    SET available_balance = available_balance + v_total,
+/mnt/data/fix13/supabase/platform_revenue.sql:103:CREATE OR REPLACE FUNCTION atomic_platform_withdrawal(p_amount NUMERIC)
+/mnt/data/fix13/supabase/platform_revenue.sql:108:  SET available_balance = available_balance - p_amount, updated_at=NOW()
+/mnt/data/fix13/supabase/platform_revenue.sql:110:    AND available_balance >= p_amount;
+/mnt/data/fix13/supabase/platform_revenue.sql:115:CREATE OR REPLACE FUNCTION restore_platform_balance(p_amount NUMERIC)
+/mnt/data/fix13/supabase/platform_revenue.sql:120:  SET available_balance = available_balance + p_amount, updated_at=NOW()
+/mnt/data/fix13/supabase/platform_revenue.sql:126:CREATE OR REPLACE FUNCTION debit_platform_refund(
+/mnt/data/fix13/supabase/platform_revenue.sql:134:    WHERE reference=p_reference AND source_type='PLATFORM_REFUND'
+/mnt/data/fix13/supabase/platform_revenue.sql:138:  SET available_balance=available_balance-p_amount,
+/mnt/data/fix13/supabase/platform_revenue.sql:141:    AND available_balance >= p_amount;
+/mnt/data/fix13/supabase/platform_revenue.sql:146:  VALUES(p_reference,'PLATFORM_REFUND',-p_amount,
+/mnt/data/fix13/supabase/platform_revenue.sql:147:         COALESCE(p_reason,'Platform-funded refund'),p_actor_id);
+/mnt/data/fix13/supabase/platform_revenue.sql:152:CREATE OR REPLACE FUNCTION complete_platform_withdrawal(
+/mnt/data/fix13/supabase/platform_revenue.sql:153:  p_withdrawal_id UUID,p_admin_id UUID
+/mnt/data/fix13/supabase/platform_revenue.sql:157:  SELECT amount INTO v_amount FROM platform_withdrawals
+/mnt/data/fix13/supabase/platform_revenue.sql:158:  WHERE id=p_withdrawal_id AND status='PROCESSING';
+/mnt/data/fix13/supabase/platform_revenue.sql:163:  SET total_withdrawn=total_withdrawn+v_amount, updated_at=NOW()
+/mnt/data/fix13/supabase/platform_revenue.sql:166:  UPDATE platform_withdrawals
+/mnt/data/fix13/supabase/platform_revenue.sql:168:  WHERE id=p_withdrawal_id;
+/mnt/data/fix13/supabase/fidelx_withdrawal_category_migration.sql:1:-- Fidelx: Paystack vendor/rider withdrawal + canonical category migration
+/mnt/data/fix13/supabase/fidelx_withdrawal_category_migration.sql:4:ALTER TABLE withdrawals
+/mnt/data/fix13/supabase/fidelx_withdrawal_category_migration.sql:12:CREATE UNIQUE INDEX IF NOT EXISTS withdrawals_paystack_transfer_id_uidx
+/mnt/data/fix13/supabase/fidelx_withdrawal_category_migration.sql:13:  ON withdrawals(paystack_transfer_id)
+/mnt/data/fix13/supabase/fidelx_withdrawal_category_migration.sql:16:CREATE UNIQUE INDEX IF NOT EXISTS withdrawals_paystack_transfer_reference_uidx
+/mnt/data/fix13/supabase/fidelx_withdrawal_category_migration.sql:17:  ON withdrawals(paystack_transfer_reference)
+/mnt/data/fix13/supabase/coupons_migration.sql:14:-- vendor_payout are still computed on the undiscounted subtotal
+/mnt/data/fix13/supabase/coupons_migration.sql:16:-- marketing cost; nothing about how fees/payouts are calculated
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:2:-- CLOSE THE DOUBLE-WITHDRAWAL RACE + WIRE UP PAYMENT RECONCILIATION
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:12:-- 1. DOUBLE-WITHDRAWAL RACE
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:13:-- requestWithdrawal's "already have a pending withdrawal" check was
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:18:-- (withdrawalController.js) now also correctly handles the resulting
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:19:-- 23505 unique_violation by rolling back the balance deduction that
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:20:-- atomic_withdraw_balance() already made before this insert — without
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:22:-- request to lose its deducted balance with no withdrawal row to
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:24:CREATE UNIQUE INDEX IF NOT EXISTS uq_one_pending_withdrawal_per_user
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:25:ON withdrawals(requester_id)
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:31:-- pattern already used for push notifications and balance releases —
+/mnt/data/fix13/supabase/reconciliation_job_migration.sql:61:-- To confirm it's actually running (same caveat as the balance-release
+/mnt/data/fix13/supabase/terms_content_migration.sql:11:-- scenarios of the platform (cancellation windows, spoiled-goods
+/mnt/data/fix13/supabase/terms_content_migration.sql:37:All prices, descriptions, and photos are vendor-controlled. If a vendor is out of stock after you've ordered, you're entitled to a full refund for that item.
+/mnt/data/fix13/supabase/terms_content_migration.sql:39:3.2 Cancellation Window
+/mnt/data/fix13/supabase/terms_content_migration.sql:40:You may cancel an order only before the vendor begins preparing it. Once an order enters preparing status, cancellation is no longer available through the app, and no refund is issued for that reason alone.
+/mnt/data/fix13/supabase/terms_content_migration.sql:43:Once a rider has been assigned and is en route to the vendor, the order can no longer be cancelled.
+/mnt/data/fix13/supabase/terms_content_migration.sql:47:- Vendor's fault (spoiled, expired, wrong item, poor packaging): full refund, vendor bears the cost.
+/mnt/data/fix13/supabase/terms_content_migration.sql:48:- Rider's fault (confirmed mishandling, excessive unexplained delay): Fidelx investigates and may refund from platform funds while separately resolving the matter with the rider.
+/mnt/data/fix13/supabase/terms_content_migration.sql:49:- Nobody's fault (genuine fragility, force majeure): Fidelx may offer a partial refund or credit at its discretion; this is not automatic.
+/mnt/data/fix13/supabase/terms_content_migration.sql:60:If you fulfill an order with a spoiled, expired, materially different, or poorly-packaged-and-damaged item, you bear the full cost of the customer refund and any required redelivery.
+/mnt/data/fix13/supabase/terms_content_migration.sql:65:4.4 Payout Cycle
+/mnt/data/fix13/supabase/terms_content_migration.sql:66:Cleared balances are aggregated and disbursed weekly (currently Tuesdays). Funds clear 24 hours after delivery confirmation.
+/mnt/data/fix13/supabase/terms_content_migration.sql:74:The delivery fee shown to the customer includes a Fidelx delivery margin (currently ₦100 per completed delivery). Your payout is the delivery fee minus this margin, and should be shown consistently everywhere your earnings appear in the app.
+/mnt/data/fix13/supabase/terms_content_migration.sql:77:If a delivery is confirmed as damaged or mishandled due to your own negligence, Fidelx may withhold or reverse that delivery's payout while the dispute is resolved. Other completed deliveries are unaffected.
+/mnt/data/fix13/supabase/promotions_budget_migration.sql:23:  balance NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (balance >= 0),
+/mnt/data/fix13/supabase/promotions_budget_migration.sql:68:  SET balance = balance + p_amount,
+/mnt/data/fix13/supabase/promotions_budget_migration.sql:82:-- balance check and the deduction happen as one guarded UPDATE, so
+/mnt/data/fix13/supabase/promotions_budget_migration.sql:103:  SET balance = balance - p_amount,
+/mnt/data/fix13/supabase/promotions_budget_migration.sql:107:    AND balance >= p_amount;
+/mnt/data/fix13/supabase/promotions_budget_migration.sql:126:CREATE OR REPLACE FUNCTION refund_promotions_budget(
+/mnt/data/fix13/supabase/promotions_budget_migration.sql:142:  SET balance = balance + v_amount,
+/mnt/data/fix13/supabase/push_notifications_migration.sql:7:-- paymentController, subOrderController, withdrawalController,
+/mnt/data/fix13/supabase/push_notifications_migration.sql:60:  -- underlying business action, e.g. a withdrawal being marked
+/mnt/data/fix13/supabase/preparing_status_migration.sql:8:-- to close the cancellation-trap bug — customers could previously
+/mnt/data/fix13/supabase/preparing_status_migration.sql:9:-- cancel for free even after a vendor had already cooked and
+/mnt/data/fix13/supabase/schema.sql:13:  withdrawal_pin_hash TEXT,
+/mnt/data/fix13/supabase/schema.sql:44:-- FEE SETTINGS (platform fee, withdrawal fee)
+/mnt/data/fix13/supabase/schema.sql:48:  withdrawal_fee_percentage NUMERIC DEFAULT 1,
+/mnt/data/fix13/supabase/schema.sql:49:  withdrawal_fee_cap NUMERIC DEFAULT 2000,
+/mnt/data/fix13/supabase/schema.sql:177:  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'successful', 'failed', 'refunded')),
+/mnt/data/fix13/supabase/schema.sql:208:  vendor_payout NUMERIC NOT NULL,
+/mnt/data/fix13/supabase/schema.sql:209:  rider_payout NUMERIC DEFAULT 0,
+/mnt/data/fix13/supabase/schema.sql:210:  withdrawal_available_at TIMESTAMPTZ,
+/mnt/data/fix13/supabase/schema.sql:212:  cancelled_at TIMESTAMPTZ,
+/mnt/data/fix13/supabase/schema.sql:232:  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'successful', 'failed', 'refunded')),
+/mnt/data/fix13/supabase/schema.sql:239:-- BALANCES (single source of truth per user)
+/mnt/data/fix13/supabase/schema.sql:240:CREATE TABLE balances (
+/mnt/data/fix13/supabase/schema.sql:243:  available_balance NUMERIC DEFAULT 0,
+/mnt/data/fix13/supabase/schema.sql:244:  pending_balance NUMERIC DEFAULT 0,
+/mnt/data/fix13/supabase/schema.sql:246:  total_withdrawn NUMERIC DEFAULT 0,
+/mnt/data/fix13/supabase/schema.sql:250:-- WITHDRAWALS
+/mnt/data/fix13/supabase/schema.sql:251:CREATE TABLE withdrawals (
+/mnt/data/fix13/supabase/schema.sql:258:  withdrawal_fee NUMERIC NOT NULL,
+/mnt/data/fix13/supabase/schema.sql:259:  net_payout NUMERIC NOT NULL,
+/mnt/data/fix13/supabase/schema.sql:269:  proof_of_payout TEXT,
+/mnt/data/fix13/supabase/schema.sql:290:-- REFUNDS
+/mnt/data/fix13/supabase/schema.sql:291:CREATE TABLE refunds (
+/mnt/data/fix13/supabase/schema.sql:308:  type TEXT NOT NULL CHECK (type IN ('ORDER', 'WITHDRAWAL', 'REFUND', 'VENDOR_SALE', 'RIDER_EARNING')),
+/mnt/data/fix13/supabase/schema.sql:427:INSERT INTO fee_settings (id, platform_fee_percentage, withdrawal_fee_percentage, withdrawal_fee_cap)
+/mnt/data/fix13/supabase/schema.sql:442:CREATE INDEX idx_withdrawals_requester ON withdrawals(requester_id);
+/mnt/data/fix13/supabase/schema.sql:443:CREATE INDEX idx_withdrawals_status ON withdrawals(status);
+/mnt/data/fix13/supabase/schema.sql:491:ALTER TABLE withdrawals ALTER COLUMN gross_amount TYPE NUMERIC(12,2);
+/mnt/data/fix13/supabase/schema.sql:492:ALTER TABLE withdrawals ALTER COLUMN withdrawal_fee TYPE NUMERIC(12,2);
+/mnt/data/fix13/supabase/schema.sql:493:ALTER TABLE withdrawals ALTER COLUMN net_payout TYPE NUMERIC(12,2);
+/mnt/data/fix13/supabase/schema.sql:494:ALTER TABLE balances ALTER COLUMN available_balance TYPE NUMERIC(12,2);
+/mnt/data/fix13/supabase/schema.sql:495:ALTER TABLE balances ALTER COLUMN total_earned TYPE NUMERIC(12,2);
+/mnt/data/fix13/supabase/schema.sql:496:ALTER TABLE balances ALTER COLUMN total_withdrawn TYPE NUMERIC(12,2);
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:12:-- balances, orders, refunds, withdrawals, or normal Paystack payments.
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:67:  SET balance = balance + v_funding.amount,
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:103:-- Returns a JSON report. It intentionally does NOT repair balances
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:120:  v_expected_balance NUMERIC := 0;
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:165:  v_expected_balance := v_ledger_net;
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:199:      ROUND(v_budget.balance, 2) = ROUND(v_expected_balance, 2)
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:206:      WHEN ROUND(v_budget.balance, 2) <> ROUND(v_expected_balance, 2) THEN 'BALANCE_MISMATCH'
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:214:      'balance', v_budget.balance,
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:232:    'expected_balance', v_expected_balance,
+/mnt/data/fix13/supabase/promotions_reconciliation_fix.sql:233:    'balance_difference', ROUND(v_budget.balance - v_expected_balance, 2),
+/mnt/data/fix13/supabase/platform_withdrawal_failure_atomic_fix.sql:1:-- Fidelx Fix #9: make platform withdrawal failure handling atomic.
+/mnt/data/fix13/supabase/platform_withdrawal_failure_atomic_fix.sql:4:-- transitions CLAIMED/PROCESSING -> FAILED and restores the reserved balance.
+/mnt/data/fix13/supabase/platform_withdrawal_failure_atomic_fix.sql:6:CREATE OR REPLACE FUNCTION fail_platform_withdrawal(
+/mnt/data/fix13/supabase/platform_withdrawal_failure_atomic_fix.sql:7:  p_withdrawal_id UUID,
+/mnt/data/fix13/supabase/platform_withdrawal_failure_atomic_fix.sql:18:  UPDATE platform_withdrawals
+/mnt/data/fix13/supabase/platform_withdrawal_failure_atomic_fix.sql:23:  WHERE id = p_withdrawal_id
+/mnt/data/fix13/supabase/platform_withdrawal_failure_atomic_fix.sql:31:  SET available_balance = available_balance + v_amount,
+/mnt/data/fix13/supabase/coupon_concurrency_fix.sql:5:-- This does NOT change orders, payments, balances, Paystack,
+/mnt/data/fix13/supabase/coupon_concurrency_fix.sql:6:-- inventory, refunds, vendors, riders, or promotions budget.
+/mnt/data/fix13/supabase/coupon_concurrency_fix.sql:135:      subtotal, platform_fee, delivery_fee, delivery_margin, vendor_payout,
+/mnt/data/fix13/supabase/coupon_concurrency_fix.sql:136:      rider_payout, withdrawal_available_at
+/mnt/data/fix13/supabase/coupon_concurrency_fix.sql:145:      (v_group->>'vendor_payout')::NUMERIC, (v_group->>'rider_payout')::NUMERIC,
+/mnt/data/fix13/supabase/coupon_concurrency_fix.sql:146:      (v_group->>'withdrawal_available_at')::TIMESTAMPTZ;
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:16:  available_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:17:  pending_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:19:  total_withdrawn NUMERIC(14,2) NOT NULL DEFAULT 0,
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:46:  'WITHDRAWAL_FEE_EARNED'
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:82:        'WITHDRAWAL_FEE_EARNED'
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:106:        'WITHDRAWAL_FEE_EARNED'
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:118:      available_balance = available_balance + v_total,
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:132:-- 4. Correct withdrawal-fee revenue function too, since it uses the
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:134:CREATE OR REPLACE FUNCTION credit_withdrawal_fee_revenue(
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:152:      'WITHDRAWAL_FEE_EARNED',
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:154:      'Withdrawal fee earned',
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:161:      'WITHDRAWAL_FEE_EARNED'
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:171:    available_balance = available_balance + p_amount,
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:248:  pa.available_balance,
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:250:  pa.total_withdrawn,
+/mnt/data/fix13/supabase/fix_and_backfill_platform_revenue.sql:260:GROUP BY pa.id, pa.available_balance, pa.total_earned, pa.total_withdrawn;
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:2:-- ONE-TIME REPAIR — stuck PENDING withdrawals from before the
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:3:-- approveWithdrawal fix.
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:5:-- WHY YOU NEED THIS: before the fix, if approving a withdrawal failed
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:7:-- balance had already been deducted at REQUEST time but was never
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:8:-- restored on failure. The withdrawal row was left sitting at
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:9:-- PENDING forever, with no working way to withdraw again (a PENDING
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:11:-- vendor has the balance" per your mental model / dashboard totals,
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:12:-- but available_balance was actually already reduced by these stuck
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:13:-- rows). This is almost certainly why requestWithdrawal has been
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:14:-- telling you "insufficient balance" during testing.
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:22:SELECT id, requester_id, requester_type, gross_amount, withdrawal_fee,
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:23:       net_payout, status, requested_at
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:24:FROM withdrawals
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:28:-- STEP 2 — restore balance + mark FAILED for every row still stuck at
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:29:-- PENDING. Uses the same restore_balance_after_rejection RPC that
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:30:-- rejectWithdrawal already calls, so it's the same trusted path.
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:35:  FOR w IN SELECT id, requester_id, gross_amount FROM withdrawals WHERE status = 'PENDING' LOOP
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:36:    PERFORM restore_balance_after_rejection(w.requester_id, w.gross_amount);
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:38:    UPDATE withdrawals
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:40:        rejection_reason = 'Repaired: stuck from testing before the approveWithdrawal rollback fix.',
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:46:-- STEP 3 — confirm balances now look right
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:47:SELECT user_id, available_balance, total_earned, total_withdrawn
+/mnt/data/fix13/supabase/repair_stuck_test_withdrawals.sql:48:FROM balances
+/mnt/data/fix13/supabase/rls_policies.sql:20:ALTER TABLE balances ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix13/supabase/rls_policies.sql:21:ALTER TABLE withdrawals ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix13/supabase/rls_policies.sql:23:ALTER TABLE refunds ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix13/supabase/rls_policies.sql:224:-- Customers can update their own orders (cancel)
+/mnt/data/fix13/supabase/rls_policies.sql:317:-- BALANCES
+/mnt/data/fix13/supabase/rls_policies.sql:319:-- Users can only read their own balance
+/mnt/data/fix13/supabase/rls_policies.sql:320:CREATE POLICY "balances_select_own" ON balances
+/mnt/data/fix13/supabase/rls_policies.sql:323:-- Only the system (service role) and admins can modify balances
+/mnt/data/fix13/supabase/rls_policies.sql:324:CREATE POLICY "balances_admin_all" ON balances
+/mnt/data/fix13/supabase/rls_policies.sql:328:-- WITHDRAWALS
+/mnt/data/fix13/supabase/rls_policies.sql:330:-- Users can read their own withdrawals
+/mnt/data/fix13/supabase/rls_policies.sql:331:CREATE POLICY "withdrawals_select_own" ON withdrawals
+/mnt/data/fix13/supabase/rls_policies.sql:334:-- Users can insert their own withdrawal requests
+/mnt/data/fix13/supabase/rls_policies.sql:335:CREATE POLICY "withdrawals_insert_own" ON withdrawals
+/mnt/data/fix13/supabase/rls_policies.sql:339:CREATE POLICY "withdrawals_admin_all" ON withdrawals
+/mnt/data/fix13/supabase/rls_policies.sql:355:-- REFUNDS
+/mnt/data/fix13/supabase/rls_policies.sql:357:-- Customers can read their own refunds
+/mnt/data/fix13/supabase/rls_policies.sql:358:CREATE POLICY "refunds_select_own_customer" ON refunds
+/mnt/data/fix13/supabase/rls_policies.sql:361:-- Customers can create refund requests
+/mnt/data/fix13/supabase/rls_policies.sql:362:CREATE POLICY "refunds_insert_customer" ON refunds
+/mnt/data/fix13/supabase/rls_policies.sql:366:CREATE POLICY "refunds_admin_all" ON refunds
+/mnt/data/fix13/supabase/paystack_fee_tracking_migration.sql:12:-- vendor's or rider's payout (both stay exactly as they are today).
+/mnt/data/fix13/supabase/atomic_functions.sql:52:-- RELEASE PRODUCT STOCK (on cancellation)
+/mnt/data/fix13/supabase/atomic_functions.sql:116:-- ATOMIC WITHDRAWAL BALANCE LOCK
+/mnt/data/fix13/supabase/atomic_functions.sql:117:-- Deducts balance atomically — prevents double spending
+/mnt/data/fix13/supabase/atomic_functions.sql:120:CREATE OR REPLACE FUNCTION atomic_withdraw_balance(
+/mnt/data/fix13/supabase/atomic_functions.sql:128:  UPDATE balances
+/mnt/data/fix13/supabase/atomic_functions.sql:130:    available_balance = available_balance - p_amount,
+/mnt/data/fix13/supabase/atomic_functions.sql:133:    AND available_balance >= p_amount;
+/mnt/data/fix13/supabase/atomic_functions.sql:141:-- BALANCE RECONCILIATION CHECK
+/mnt/data/fix13/supabase/atomic_functions.sql:142:-- Compares balances.total_earned against the authoritative
+/mnt/data/fix13/supabase/atomic_functions.sql:143:-- sub_order_payouts records for vendor/rider earnings.
+/mnt/data/fix13/supabase/atomic_functions.sql:151:-- sub_order_payouts records the actual recipient and amount for each
+/mnt/data/fix13/supabase/atomic_functions.sql:152:-- vendor/rider delivery payout and has a reversal marker. Therefore
+/mnt/data/fix13/supabase/atomic_functions.sql:154:-- payout records, which matches the balance-crediting source of truth.
+/mnt/data/fix13/supabase/atomic_functions.sql:156:CREATE OR REPLACE FUNCTION reconcile_balances()
+/mnt/data/fix13/supabase/atomic_functions.sql:159:  balance_table_amount NUMERIC,
+/mnt/data/fix13/supabase/atomic_functions.sql:160:  payout_sum NUMERIC,
+/mnt/data/fix13/supabase/atomic_functions.sql:167:    b.total_earned AS balance_table_amount,
+/mnt/data/fix13/supabase/atomic_functions.sql:173:    ), 0) AS payout_sum,
+/mnt/data/fix13/supabase/atomic_functions.sql:180:  FROM balances b
+/mnt/data/fix13/supabase/atomic_functions.sql:181:  LEFT JOIN sub_order_payouts sop
+/mnt/data/fix13/supabase/atomic_functions.sql:197:-- RECORD COMPLETED WITHDRAWAL
+/mnt/data/fix13/supabase/atomic_functions.sql:199:-- the withdrawal. Keeps total_withdrawn as a completed-withdrawal
+/mnt/data/fix13/supabase/atomic_functions.sql:202:CREATE OR REPLACE FUNCTION record_completed_withdrawal(
+/mnt/data/fix13/supabase/atomic_functions.sql:208:  UPDATE balances
+/mnt/data/fix13/supabase/atomic_functions.sql:209:  SET total_withdrawn = total_withdrawn + p_amount,
+/mnt/data/fix13/supabase/atomic_functions.sql:216:-- RESTORE BALANCE AFTER WITHDRAWAL REJECTION
+/mnt/data/fix13/supabase/atomic_functions.sql:218:CREATE OR REPLACE FUNCTION restore_balance_after_rejection(
+/mnt/data/fix13/supabase/atomic_functions.sql:224:  UPDATE balances
+/mnt/data/fix13/supabase/atomic_functions.sql:226:    available_balance = available_balance + p_amount,
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:2:-- WITHDRAWALS — PAYSTACK BANK VERIFICATION + TRANSFER TRACKING
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:5:-- the real Paystack transfer this withdrawal corresponds to.
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:6:-- Run this before deploying the updated withdrawalController.js —
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:10:ALTER TABLE withdrawals
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:19:CREATE UNIQUE INDEX IF NOT EXISTS withdrawals_paystack_transfer_id_unique
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:20:  ON withdrawals(paystack_transfer_id)
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:23:CREATE UNIQUE INDEX IF NOT EXISTS withdrawals_paystack_reference_unique
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:24:  ON withdrawals(paystack_reference)
+/mnt/data/fix13/supabase/withdrawals_paystack_migration.sql:27:-- Existing withdrawals approved under the old flow have no bank_code
+/mnt/data/fix13/supabase/reconcile_stuck_refunds_migration.sql:2:-- STUCK REFUND RECONCILIATION JOB
+/mnt/data/fix13/supabase/reconcile_stuck_refunds_migration.sql:5:-- Safety net for refunds whose Paystack refund.processed webhook was
+/mnt/data/fix13/supabase/reconcile_stuck_refunds_migration.sql:6:-- dropped, delayed, or never delivered — without this, a refund
+/mnt/data/fix13/supabase/reconcile_stuck_refunds_migration.sql:8:-- refunds table forever, and the responsible vendor/rider's balance
+/mnt/data/fix13/supabase/reconcile_stuck_refunds_migration.sql:20:  'reconcile-stuck-refunds',
+/mnt/data/fix13/supabase/reconcile_stuck_refunds_migration.sql:24:    url := 'https://fidelx-backend.onrender.com/api/refunds/reconcile-internal',
+/mnt/data/fix13/supabase/background_jobs.sql:45:        -- Cancel the order if it is still pending payment
+/mnt/data/fix13/supabase/background_jobs.sql:47:        SET status = 'CANCELLED'
+/mnt/data/fix13/supabase/background_jobs.sql:51:        -- Cancel related sub-orders
+/mnt/data/fix13/supabase/background_jobs.sql:53:        SET status = 'CANCELLED', cancelled_at = NOW()
+/mnt/data/fix13/supabase/background_jobs.sql:73:    -- Find delivered sub-orders past their withdrawal window
+/mnt/data/fix13/supabase/background_jobs.sql:78:    AND withdrawal_available_at < NOW()
+/mnt/data/fix13/supabase/background_jobs.sql:84:    -- Release vendor balance for sub-orders past window
+/mnt/data/fix13/supabase/background_jobs.sql:86:    -- Actual payout happens via withdrawal request
+/mnt/data/fix13/supabase/background_jobs.sql:173:-- JOB 6: DAILY BALANCE RECONCILIATION
+/mnt/data/fix13/supabase/background_jobs.sql:175:-- Compares balances table against ledger sums
+/mnt/data/fix13/supabase/background_jobs.sql:179:  'daily-balance-reconciliation',
+/mnt/data/fix13/supabase/background_jobs.sql:187:      FOR mismatch IN SELECT * FROM reconcile_balances()
+/mnt/data/fix13/supabase/background_jobs.sql:195:          '⚠️ Balance Drift Detected',
+/mnt/data/fix13/supabase/background_jobs.sql:196:          'User ' || mismatch.user_id || ' has a balance drift of ₦' || ABS(mismatch.drift) || '. Manual review required.',
+/mnt/data/fix13/supabase/background_jobs.sql:203:          'BALANCE_DRIFT_DETECTED',
+/mnt/data/fix13/supabase/background_jobs.sql:206:          'balance',
+/mnt/data/fix13/supabase/background_jobs.sql:208:            'balance_table', mismatch.balance_table_amount,
+/mnt/data/fix13/supabase/background_jobs.sql:216:        RAISE NOTICE '% balance mismatch(es) detected and logged.', mismatch_count;
+/mnt/data/fix13/supabase/refund_architecture.sql:1:-- Cartmoove refund architecture migration
+/mnt/data/fix13/supabase/refund_architecture.sql:3:-- This migration is additive and does not delete existing refund records.
+/mnt/data/fix13/supabase/refund_architecture.sql:5:ALTER TABLE refunds
+/mnt/data/fix13/supabase/refund_architecture.sql:8:  ADD COLUMN IF NOT EXISTS refund_type TEXT DEFAULT 'full',
+/mnt/data/fix13/supabase/refund_architecture.sql:15:  ADD COLUMN IF NOT EXISTS paystack_refund_id TEXT,
+/mnt/data/fix13/supabase/refund_architecture.sql:18:  ADD COLUMN IF NOT EXISTS balance_debited BOOLEAN DEFAULT FALSE;
+/mnt/data/fix13/supabase/refund_architecture.sql:20:ALTER TABLE refunds
+/mnt/data/fix13/supabase/refund_architecture.sql:21:  DROP CONSTRAINT IF EXISTS refunds_status_check;
+/mnt/data/fix13/supabase/refund_architecture.sql:23:ALTER TABLE refunds
+/mnt/data/fix13/supabase/refund_architecture.sql:24:  ADD CONSTRAINT refunds_status_check
+/mnt/data/fix13/supabase/refund_architecture.sql:27:ALTER TABLE refunds
+/mnt/data/fix13/supabase/refund_architecture.sql:28:  ADD CONSTRAINT refunds_fault_party_check
+/mnt/data/fix13/supabase/refund_architecture.sql:31:ALTER TABLE refunds
+/mnt/data/fix13/supabase/refund_architecture.sql:32:  ADD CONSTRAINT refunds_type_check
+/mnt/data/fix13/supabase/refund_architecture.sql:33:  CHECK (refund_type IS NULL OR refund_type IN ('full', 'partial'));
+/mnt/data/fix13/supabase/refund_architecture.sql:35:CREATE UNIQUE INDEX IF NOT EXISTS idx_refunds_paystack_refund_id
+/mnt/data/fix13/supabase/refund_architecture.sql:36:  ON refunds(paystack_refund_id)
+/mnt/data/fix13/supabase/refund_architecture.sql:37:  WHERE paystack_refund_id IS NOT NULL;
+/mnt/data/fix13/supabase/refund_architecture.sql:39:CREATE INDEX IF NOT EXISTS idx_refunds_payment_id ON refunds(payment_id);
+/mnt/data/fix13/supabase/refund_architecture.sql:40:CREATE INDEX IF NOT EXISTS idx_refunds_status ON refunds(status);
+/mnt/data/fix13/supabase/refund_architecture.sql:41:CREATE INDEX IF NOT EXISTS idx_refunds_transaction_reference ON refunds(paystack_transaction_reference);
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:2:-- ATOMIC VENDOR/RIDER WITHDRAWAL COMPLETION
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:4:-- Completes the withdrawal AND all money-side accounting in one
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:9:CREATE OR REPLACE FUNCTION complete_vendor_rider_withdrawal(
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:10:  p_withdrawal_id UUID,
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:20:  v_withdrawal_fee NUMERIC;
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:21:  v_net_payout NUMERIC;
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:26:  UPDATE withdrawals
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:30:  WHERE id = p_withdrawal_id
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:32:  RETURNING requester_id, gross_amount, withdrawal_fee, net_payout, account_name
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:33:    INTO v_requester_id, v_gross_amount, v_withdrawal_fee, v_net_payout, v_account_name;
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:41:  UPDATE balances
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:42:  SET total_withdrawn = total_withdrawn + v_gross_amount,
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:47:    RAISE EXCEPTION 'Balance row missing for completed withdrawal %', p_withdrawal_id;
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:50:  -- One completion ledger row per withdrawal. The unique reference/type
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:55:    (gen_random_uuid(), p_withdrawal_id, 'WITHDRAWAL_COMPLETED',
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:56:     v_gross_amount, v_withdrawal_fee, v_net_payout,
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:57:     'withdrawal_queue', 'bank_account', NULL,
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:58:     'Withdrawal paid to ' || COALESCE(v_account_name, 'bank account'))
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:62:  -- that is not an error and must not roll back the successful withdrawal.
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:63:  IF COALESCE(v_withdrawal_fee, 0) > 0 THEN
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:64:    PERFORM credit_withdrawal_fee_revenue(
+/mnt/data/fix13/supabase/withdrawal_completion_atomic_fix.sql:65:      p_withdrawal_id, v_withdrawal_fee, NULL
+/mnt/data/fix13/supabase/promotions_paystack_funding_migration.sql:3:-- orders, payments, refunds, vendor/rider balances, or existing ledgers.
+/mnt/data/fix13/supabase/promotions_paystack_funding_migration.sql:43:  SET balance = balance + v_funding.amount,
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:2:-- WITHDRAWAL FEE -> PLATFORM REVENUE — MIGRATION
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:5:-- WHY: requestWithdrawal deducts the FULL gross_amount from the
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:6:-- requester's balance, but approveWithdrawal only ever sent
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:7:-- net_payout (gross_amount - withdrawal_fee) to Paystack. The
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:8:-- withdrawal_fee difference was never credited anywhere — it left
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:9:-- the vendor/rider's balance but never landed in platform_accounts,
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:15:-- index so WITHDRAWAL_FEE_EARNED gets the same idempotency guarantee
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:24:WHERE source_type IN ('PLATFORM_FEE_EARNED', 'DELIVERY_MARGIN_EARNED', 'WITHDRAWAL_FEE_EARNED');
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:26:CREATE OR REPLACE FUNCTION credit_withdrawal_fee_revenue(
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:38:  VALUES (p_reference, 'WITHDRAWAL_FEE_EARNED', p_amount,
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:39:    'Withdrawal fee earned on processed withdrawal', p_actor_id)
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:44:  ON CONFLICT (reference, source_type) WHERE source_type IN ('PLATFORM_FEE_EARNED','DELIVERY_MARGIN_EARNED','WITHDRAWAL_FEE_EARNED')
+/mnt/data/fix13/supabase/withdrawal_fee_revenue_migration.sql:52:  SET available_balance = available_balance + p_amount,
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:18:--   - overwrite their own users.password_hash / withdrawal_pin_hash
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:45:-- USERS: lock role, password_hash, withdrawal_pin_hash
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:52:    NEW.withdrawal_pin_hash := OLD.withdrawal_pin_hash;
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:111:-- orders "(cancel)", but the actual cancel flow (subOrderController /
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:118:-- cancellation via direct client update rather than an API call,
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:147:-- vendor_payout/rider_payout, or flip status to DELIVERED without
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:158:    NEW.vendor_payout := OLD.vendor_payout;
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:159:    NEW.rider_payout := OLD.rider_payout;
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:160:    NEW.withdrawal_available_at := OLD.withdrawal_available_at;
+/mnt/data/fix13/supabase/protect_self_update_columns_migration.sql:162:    NEW.cancelled_at := OLD.cancelled_at;

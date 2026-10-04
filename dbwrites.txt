@@ -1,0 +1,186 @@
+/mnt/data/fix42/controllers/couponController.js:122:      .insert({
+/mnt/data/fix42/controllers/couponController.js:174:      .update({ is_active: !coupon.is_active })
+/mnt/data/fix42/controllers/inventoryController.js:66:    await adminClient.from("inventory_reservations").insert(reservation);
+/mnt/data/fix42/controllers/inventoryController.js:93:      .update({ status: "released" })
+/mnt/data/fix42/controllers/inventoryController.js:143:      .update({ status: "confirmed" })
+/mnt/data/fix42/controllers/disputeController.js:60:      .insert({
+/mnt/data/fix42/controllers/disputeController.js:123:    await adminClient.from("disputes").update({
+/mnt/data/fix42/controllers/customerReferralController.js:42:      .update(updates)
+/mnt/data/fix42/controllers/customerReferralController.js:102:      .insert({
+/mnt/data/fix42/controllers/customerReferralController.js:124:      .update({
+/mnt/data/fix42/controllers/customerReferralController.js:135:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/riderController.js:17:    .update({
+/mnt/data/fix42/controllers/riderController.js:35:    .update({ nin_verification_attempts: (current?.nin_verification_attempts || 0) + 1 })
+/mnt/data/fix42/controllers/riderController.js:38:  await adminClient.from("rider_verification_logs").insert({
+/mnt/data/fix42/controllers/riderController.js:54:      .update({ status: "approved" })
+/mnt/data/fix42/controllers/riderController.js:60:      await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/riderController.js:76:      await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/riderController.js:142:      .insert({
+/mnt/data/fix42/controllers/riderController.js:223:      await adminClient.from("riders").update({ nin: newNin }).eq("id", rider.id);
+/mnt/data/fix42/controllers/riderController.js:280:      .update({ location_lat: lat, location_lng: lng, last_seen: new Date().toISOString() })
+/mnt/data/fix42/controllers/riderController.js:298:      .update({ is_active })
+/mnt/data/fix42/controllers/riderController.js:361:      .update({ rider_id: rider.id, status: "RIDER_ASSIGNED" })
+/mnt/data/fix42/controllers/pushController.js:47:    await adminClient.from("push_subscriptions").delete().eq("endpoint", endpoint).eq("user_id", req.user.id);
+/mnt/data/fix42/controllers/pushController.js:98:            await adminClient.from("push_subscriptions").delete().eq("id", sub.id);
+/mnt/data/fix42/controllers/productController.js:134:      .insert({
+/mnt/data/fix42/controllers/productController.js:162:      await adminClient.from("product_variants").insert(variantRows);
+/mnt/data/fix42/controllers/productController.js:216:      .update(updates)
+/mnt/data/fix42/controllers/productController.js:258:      .update({ is_available: false, deleted_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/adminController.js:25:      .update({ status: "approved" })
+/mnt/data/fix42/controllers/adminController.js:32:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/adminController.js:54:      .update({ status: "rejected", rejection_reason: reason, reviewed_by: req.user.id, reviewed_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/adminController.js:61:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/adminController.js:69:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/adminController.js:99:      .update({
+/mnt/data/fix42/controllers/adminController.js:111:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/adminController.js:119:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/adminController.js:152:      .update({ status: "approved", suspension_reason: null, suspended_by: null, suspended_at: null })
+/mnt/data/fix42/controllers/adminController.js:157:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/adminController.js:165:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/adminController.js:234:      .update(updatePayload)
+/mnt/data/fix42/controllers/adminController.js:242:      await adminClient.from("rider_verification_logs").insert({
+/mnt/data/fix42/controllers/adminController.js:253:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/adminController.js:276:      .update({ status: "rejected", rejection_reason: reason, reviewed_by: req.user.id, reviewed_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/adminController.js:283:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/adminController.js:309:    await adminClient.from("riders").update(updates).eq("id", req.params.id);
+/mnt/data/fix42/controllers/adminController.js:312:      await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/adminController.js:445:        await adminClient.from("disputes").update({ status: "open" }).eq("id", dispute.id);
+/mnt/data/fix42/controllers/adminController.js:454:    const { error: updateError } = await adminClient.from("disputes").update({
+/mnt/data/fix42/controllers/adminController.js:463:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/adminController.js:524:    const { error: insertError } = await adminClient.from("notifications").insert(rows);
+/mnt/data/fix42/controllers/adminController.js:527:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/adminController.js:561:      .insert({
+/mnt/data/fix42/controllers/adminController.js:573:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/adminController.js:613:      .update({ is_active: false })
+/mnt/data/fix42/controllers/adminController.js:690:    await adminClient.from("support_tickets").update({ messages, status: "IN_PROGRESS" }).eq("id", req.params.id);
+/mnt/data/fix42/controllers/adminController.js:692:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/supportController.js:27:    const { data, error } = await adminClient.from("support_tickets").insert({
+/mnt/data/fix42/controllers/supportController.js:91:    await adminClient.from("support_tickets").update({ messages, status: "IN_PROGRESS" }).eq("id", req.params.id);
+/mnt/data/fix42/controllers/receiptController.js:87:  const { data, error } = await adminClient.from("receipts").insert({
+/mnt/data/fix42/controllers/paymentController.js:23:    .update(req.body)
+/mnt/data/fix42/controllers/paymentController.js:53:    .update({ status: "successful", paystack_fee: realPaystackFee })
+/mnt/data/fix42/controllers/paymentController.js:94:    .update({ status: "PAYMENT_CONFIRMED", payment_status: "successful", paystack_fee: realPaystackFee })
+/mnt/data/fix42/controllers/paymentController.js:100:    .update({ status: "PAYMENT_CONFIRMED" })
+/mnt/data/fix42/controllers/paymentController.js:151:      await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/paymentController.js:165:  const { error: ledgerError } = await adminClient.from("ledger_entries").insert({
+/mnt/data/fix42/controllers/paymentController.js:179:  await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/paymentController.js:196:    await adminClient.from("notifications").insert(notifications);
+/mnt/data/fix42/controllers/paymentController.js:224:    .update({ processing_completed_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/paymentController.js:288:    const { error: paymentInsertError } = await adminClient.from("payments").insert({
+/mnt/data/fix42/controllers/paymentController.js:313:      await adminClient.from("payments").update({
+/mnt/data/fix42/controllers/paymentController.js:326:      .update({ authorization_url })
+/mnt/data/fix42/controllers/paymentController.js:337:      .update({ paystack_reference: reference })
+/mnt/data/fix42/controllers/paymentController.js:393:      await adminClient.from("payments").update({ status: "failed" }).eq("paystack_reference", reference);
+/mnt/data/fix42/controllers/paymentController.js:417:  const { error: notificationError } = await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/paymentController.js:443:  const { error: notificationError } = await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/paymentController.js:555:            .update({ paystack_status: "amount_mismatch", updated_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/paymentController.js:628:        await adminClient.from("refunds").update({
+/mnt/data/fix42/controllers/paymentController.js:635:        await adminClient.from("refunds").update({
+/mnt/data/fix42/controllers/paymentController.js:644:        await adminClient.from("refunds").update({
+/mnt/data/fix42/controllers/authController.js:175:        await adminClient.from("policy_acceptances").insert({
+/mnt/data/fix42/controllers/authController.js:326:        await adminClient.from("users").update({ totp_backup_codes: remainingBackupCodes }).eq("id", user.id);
+/mnt/data/fix42/controllers/authController.js:367:    await adminClient.from("users").update({ totp_secret: secret }).eq("id", req.user.id);
+/mnt/data/fix42/controllers/authController.js:408:      .update({ totp_enabled: true, totp_backup_codes: hashed })
+/mnt/data/fix42/controllers/authController.js:452:      .update({ totp_enabled: false, totp_secret: null, totp_backup_codes: [] })
+/mnt/data/fix42/controllers/authController.js:502:    await adminClient.from("users").update({ password_hash }).eq("id", req.user.id);
+/mnt/data/fix42/controllers/authController.js:536:      const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+/mnt/data/fix42/controllers/authController.js:541:        .update({
+/mnt/data/fix42/controllers/authController.js:583:    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+/mnt/data/fix42/controllers/authController.js:607:      .update({
+/mnt/data/fix42/controllers/uploadController.js:244:    const { error: updateError } = await adminClient.from("vendors").update({ logo_url }).eq("id", vendor.id);
+/mnt/data/fix42/controllers/deliveryController.js:195:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/deliveryController.js:216:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/notificationController.js:26:      .update({ is_read: true })
+/mnt/data/fix42/controllers/notificationController.js:41:      .update({ is_read: true })
+/mnt/data/fix42/controllers/subOrderController.js:610:    await adminClient.from("ledger_entries").insert({
+/mnt/data/fix42/controllers/subOrderController.js:814:    // .update() here: two concurrent requests for the same sub-order
+/mnt/data/fix42/controllers/subOrderController.js:843:      await adminClient.from("sub_orders").update(remainingUpdates).eq("id", req.params.subOrderId);
+/mnt/data/fix42/controllers/subOrderController.js:903:        .update({ status: STATUSES.DELIVERED })
+/mnt/data/fix42/controllers/subOrderController.js:932:            await adminClient.from("admin_alerts").insert({
+/mnt/data/fix42/controllers/subOrderController.js:953:      await adminClient.from("orders").update({ status: STATUSES.CANCELLED }).eq("id", subOrder.order_id);
+/mnt/data/fix42/controllers/subOrderController.js:964:      await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/subOrderController.js:1031:    await adminClient.from("sub_orders").update({ cancelled_at: new Date().toISOString() }).eq("id", req.params.subOrderId);
+/mnt/data/fix42/controllers/subOrderController.js:1187:      .update({ rider_id: rider.id, status: STATUSES.RIDER_ASSIGNED })
+/mnt/data/fix42/controllers/subOrderController.js:1199:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/platformRevenueController.js:103:    await adminClient.from("platform_withdrawals").update({ paystack_reference: reference }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix42/controllers/platformRevenueController.js:114:    await adminClient.from("platform_withdrawals").update({
+/mnt/data/fix42/controllers/platformRevenueController.js:128:      await adminClient.from("platform_withdrawals").update({status:"PENDING"}).eq("id",req.params.id).eq("status","CLAIMED");
+/mnt/data/fix42/controllers/platformRevenueController.js:131:      await adminClient.from("platform_withdrawals").update({
+/mnt/data/fix42/controllers/vendorController.js:54:      .insert({
+/mnt/data/fix42/controllers/vendorController.js:238:      .update(updates)
+/mnt/data/fix42/controllers/pilotAndOpsController.js:31:    await adminClient.from("admin_alerts").update({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:44:  await adminClient.from("admin_alerts").insert({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:69:    await adminClient.from("stuck_orders").update({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:166:      await adminClient.from("policies").update({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:172:      await adminClient.from("policies").insert({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:178:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:235:      await adminClient.from("pilot_settings").update(updates).eq("id", existing.id);
+/mnt/data/fix42/controllers/pilotAndOpsController.js:237:      await adminClient.from("pilot_settings").insert({ id: uuidv4(), ...updates });
+/mnt/data/fix42/controllers/pilotAndOpsController.js:240:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:260:    const { data, error } = await adminClient.from("invite_codes").insert({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:306:    await adminClient.from("invite_codes").update({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:330:    await adminClient.from("stuck_orders").insert({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:366:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/pilotAndOpsController.js:376:      await adminClient.from("stuck_orders").update({
+/mnt/data/fix42/controllers/reviewController.js:27:    .update({ rating: parseFloat(avg.toFixed(1)) })
+/mnt/data/fix42/controllers/reviewController.js:45:    .update({ rating: parseFloat(avg.toFixed(1)) })
+/mnt/data/fix42/controllers/reviewController.js:91:      .insert({
+/mnt/data/fix42/controllers/reviewController.js:114:      await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/reviewController.js:165:      .update(updates)
+/mnt/data/fix42/controllers/reviewController.js:362:      .update({ vendor_reply: reply.trim(), vendor_reply_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/reviewController.js:372:      await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/reviewController.js:427:    await adminClient.from("reviews").update({ is_flagged: true }).eq("id", req.params.id);
+/mnt/data/fix42/controllers/reviewController.js:444:    await adminClient.from("reviews").update({
+/mnt/data/fix42/controllers/reviewController.js:464:    await adminClient.from("reviews").update({ is_removed: false, is_flagged: false, removed_reason: null }).eq("id", req.params.id);
+/mnt/data/fix42/controllers/onboardingController.js:20:        .insert({ id: uuidv4(), user_id: req.user.id, role: req.user.role })
+/mnt/data/fix42/controllers/onboardingController.js:61:      await adminClient.from("onboarding_progress").insert({
+/mnt/data/fix42/controllers/onboardingController.js:65:      await adminClient.from("onboarding_progress").update({
+/mnt/data/fix42/controllers/onboardingController.js:80:      await adminClient.from("onboarding_progress").update({
+/mnt/data/fix42/controllers/onboardingController.js:108:    await adminClient.from("vendors").update({
+/mnt/data/fix42/controllers/onboardingController.js:143:    await adminClient.from("riders").update({
+/mnt/data/fix42/controllers/withdrawalController.js:157:    await adminClient.from("users").update({ withdrawal_pin_hash }).eq("id", req.user.id);
+/mnt/data/fix42/controllers/withdrawalController.js:215:    const { data: withdrawalRow, error: insertError } = await adminClient.from("withdrawals").insert({
+/mnt/data/fix42/controllers/withdrawalController.js:238:    await adminClient.from("ledger_entries").insert({
+/mnt/data/fix42/controllers/withdrawalController.js:405:        .update({
+/mnt/data/fix42/controllers/withdrawalController.js:424:        await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/withdrawalController.js:436:      await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/withdrawalController.js:440:      await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/withdrawalController.js:451:        await adminClient.from("withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix42/controllers/withdrawalController.js:462:        await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/withdrawalController.js:492:        .update({
+/mnt/data/fix42/controllers/withdrawalController.js:499:      await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/withdrawalController.js:537:    await adminClient.from("notifications").insert({ id: uuidv4(), user_id: withdrawal.requester_id, title: "Withdrawal Rejected", body: `Your withdrawal was rejected. Reason: ${reason}. Your balance has been restored.`, is_read: false });
+/mnt/data/fix42/controllers/withdrawalController.js:538:    await adminClient.from("audit_logs").insert({ id: uuidv4(), action: "WITHDRAWAL_REJECTED", actor_id: req.user.id, target_id: req.params.id, target_type: "withdrawal", details: { reason } });
+/mnt/data/fix42/controllers/withdrawalController.js:558:      await adminClient.from("fee_settings").update({ withdrawal_fee_percentage, withdrawal_fee_cap, updated_by: req.user.id, updated_at: new Date().toISOString() }).eq("id", existing.id);
+/mnt/data/fix42/controllers/withdrawalController.js:560:      await adminClient.from("fee_settings").insert({ id: uuidv4(), withdrawal_fee_percentage, withdrawal_fee_cap, updated_by: req.user.id });
+/mnt/data/fix42/controllers/withdrawalController.js:562:    await adminClient.from("audit_logs").insert({ id: uuidv4(), action: "FEE_SETTINGS_UPDATED", actor_id: req.user.id, target_type: "fee_settings", details: { withdrawal_fee_percentage, withdrawal_fee_cap } });
+/mnt/data/fix42/controllers/promotionsController.js:59:      .insert({
+/mnt/data/fix42/controllers/promotionsController.js:95:        .update({ authorization_url: authorizationUrl, updated_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/promotionsController.js:101:        .update({ status: "failed", paystack_status: paystackError.response?.data?.message || "initialization_failed", updated_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/promotionsController.js:136:        .update({ paystack_status: transaction?.status || "not_successful", updated_at: new Date().toISOString() })
+/mnt/data/fix42/controllers/operationalController.js:25:    const { error } = await adminClient.from("vendors").update(updates).eq("user_id", req.user.id);
+/mnt/data/fix42/controllers/operationalController.js:96:      await adminClient.from("notification_preferences").update(filtered).eq("user_id", req.user.id);
+/mnt/data/fix42/controllers/operationalController.js:98:      await adminClient.from("notification_preferences").insert({ id: uuidv4(), user_id: req.user.id, ...filtered });
+/mnt/data/fix42/controllers/operationalController.js:299:      .update({
+/mnt/data/fix42/controllers/operationalController.js:311:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/operationalController.js:322:    await adminClient.from("refunds").update({
+/mnt/data/fix42/controllers/operationalController.js:399:    await adminClient.from("sub_orders").update({ status: "REFUNDED" }).eq("id", refund.sub_order_id);
+/mnt/data/fix42/controllers/operationalController.js:404:      await adminClient.from("payments").update({ status: "refunded" }).eq("id", refund.payment_id);
+/mnt/data/fix42/controllers/operationalController.js:440:        await adminClient.from("vendors").update({ strike_count: (vendorRow?.strike_count || 0) + 1 }).eq("id", subOrder.vendor_id);
+/mnt/data/fix42/controllers/operationalController.js:447:        await adminClient.from("riders").update({ strike_count: newCount, ...(newCount >= 3 ? { status: "suspended" } : {}) }).eq("id", subOrder.rider_id);
+/mnt/data/fix42/controllers/operationalController.js:455:  await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/operationalController.js:481:    await adminClient.from("notifications").insert({
+/mnt/data/fix42/controllers/reconciliationController.js:121:  const { error: insertError } = await adminClient.from("refunds").insert({
+/mnt/data/fix42/controllers/reconciliationController.js:235:          await adminClient.from("payments").update({ status: "failed" }).eq("id", payment.id);
+/mnt/data/fix42/controllers/reconciliationController.js:249:        await adminClient.from("orders").update({ status: "EXPIRED" }).eq("id", order.id);
+/mnt/data/fix42/controllers/reconciliationController.js:271:        await adminClient.from("orders").update({ status: "FAILED_BUT_CHARGED" }).eq("id", order.id);
+/mnt/data/fix42/controllers/reconciliationController.js:284:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix42/controllers/reconciliationController.js:341:        await adminClient.from("refunds").update({
+/mnt/data/fix42/controllers/reconciliationController.js:349:        await adminClient.from("refunds").update({
+/mnt/data/fix42/controllers/reconciliationController.js:357:        await adminClient.from("refunds").update({ paystack_status: paystackStatus }).eq("id", refund.id);
+/mnt/data/fix42/controllers/reconciliationController.js:467:        const { data: moved, error: moveError } = await adminClient.from("withdrawals").update({
+/mnt/data/fix42/controllers/reconciliationController.js:488:        await adminClient.from("withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix42/controllers/reconciliationController.js:495:        await adminClient.from("withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix42/controllers/reconciliationController.js:526:          .update({
+/mnt/data/fix42/controllers/reconciliationController.js:550:        await adminClient.from("platform_withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");
+/mnt/data/fix42/controllers/reconciliationController.js:555:        await adminClient.from("platform_withdrawals").update({ status: "PENDING" }).eq("id", withdrawal.id).eq("status", "CLAIMED");

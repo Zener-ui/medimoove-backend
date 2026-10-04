@@ -1,0 +1,250 @@
+/mnt/data/fix26/controllers/couponController.js:88:      code, customerId: req.user.id, vendorId: vendor_id,
+/mnt/data/fix26/controllers/couponController.js:136:        created_by: req.user.id,
+/mnt/data/fix26/controllers/couponController.js:169:    const { data: coupon } = await adminClient.from("coupons").select("is_active").eq("id", req.params.id).single();
+/mnt/data/fix26/controllers/couponController.js:175:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/inventoryController.js:16:    const { data: updated, error } = await adminClient.rpc(
+/mnt/data/fix26/controllers/inventoryController.js:34:      const { data: variantUpdated, error: variantError } = await adminClient.rpc(
+/mnt/data/fix26/controllers/inventoryController.js:44:        await adminClient.rpc("release_product_stock", {
+/mnt/data/fix26/controllers/inventoryController.js:66:    await adminClient.from("inventory_reservations").insert(reservation);
+/mnt/data/fix26/controllers/inventoryController.js:79:    await adminClient.rpc("release_product_stock", {
+/mnt/data/fix26/controllers/inventoryController.js:85:      await adminClient.rpc("release_variant_stock", {
+/mnt/data/fix26/controllers/inventoryController.js:129:    await adminClient.rpc("confirm_product_stock", {
+/mnt/data/fix26/controllers/inventoryController.js:135:      await adminClient.rpc("confirm_variant_stock", {
+/mnt/data/fix26/controllers/disputeController.js:16:    if (order.customer_id !== req.user.id) return res.status(403).json({ success: false, message: "Not authorized." });
+/mnt/data/fix26/controllers/disputeController.js:50:    const ownStoragePrefix = `storage://dispute-evidence/${req.user.id}/`;
+/mnt/data/fix26/controllers/disputeController.js:63:        customer_id: req.user.id,
+/mnt/data/fix26/controllers/disputeController.js:91:      .eq("customer_id", req.user.id)
+/mnt/data/fix26/controllers/disputeController.js:115:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/disputeController.js:119:    if (dispute.customer_id !== req.user.id) return res.status(403).json({ success: false, message: "Not authorized." });
+/mnt/data/fix26/controllers/disputeController.js:123:    await adminClient.from("disputes").update({
+/mnt/data/fix26/controllers/disputeController.js:127:    }).eq("id", req.params.id);
+/mnt/data/fix26/controllers/searchController.js:49:      const { data: fuzzyIds, error: fuzzyError } = await adminClient.rpc("search_products_fuzzy", { p_query: q });
+/mnt/data/fix26/controllers/searchController.js:124:    adminClient.rpc("increment_product_views", { product_ids: ids }).then(() => {}).catch(() => {});
+/mnt/data/fix26/controllers/customerReferralController.js:92:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/customerReferralController.js:115:        created_by: req.user.id,
+/mnt/data/fix26/controllers/customerReferralController.js:127:        reward_sent_by: req.user.id,
+/mnt/data/fix26/controllers/customerReferralController.js:135:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/customerReferralController.js:159:      .eq("referred_by_customer_id", req.user.id)
+/mnt/data/fix26/controllers/customerReferralController.js:165:      .eq("referred_by_customer_id", req.user.id);
+/mnt/data/fix26/controllers/riderController.js:38:  await adminClient.from("rider_verification_logs").insert({
+/mnt/data/fix26/controllers/riderController.js:60:      await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/riderController.js:76:      await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/riderController.js:105:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:128:    const terms = await checkTermsAccepted(req.user.id);
+/mnt/data/fix26/controllers/riderController.js:137:      .eq("id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:144:        user_id: req.user.id,
+/mnt/data/fix26/controllers/riderController.js:199:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:223:      await adminClient.from("riders").update({ nin: newNin }).eq("id", rider.id);
+/mnt/data/fix26/controllers/riderController.js:229:      .eq("id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:260:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:281:      .eq("user_id", req.user.id);
+/mnt/data/fix26/controllers/riderController.js:299:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:318:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:351:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:362:      .eq("id", req.params.orderId)
+/mnt/data/fix26/controllers/riderController.js:384:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:393:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/riderController.js:399:      .eq("responsible_user_id", req.user.id)
+/mnt/data/fix26/controllers/pushController.js:30:        { id: uuidv4(), user_id: req.user.id, endpoint, p256dh: keys.p256dh, auth_key: keys.auth },
+/mnt/data/fix26/controllers/pushController.js:47:    await adminClient.from("push_subscriptions").delete().eq("endpoint", endpoint).eq("user_id", req.user.id);
+/mnt/data/fix26/controllers/pushController.js:98:            await adminClient.from("push_subscriptions").delete().eq("id", sub.id);
+/mnt/data/fix26/controllers/productController.js:19:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/productController.js:78:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/productController.js:109:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/productController.js:162:      await adminClient.from("product_variants").insert(variantRows);
+/mnt/data/fix26/controllers/productController.js:179:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/productController.js:189:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/productController.js:217:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/productController.js:239:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/productController.js:249:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/productController.js:259:      .eq("id", req.params.id);
+/mnt/data/fix26/controllers/adminController.js:10:    let query = adminClient.from("vendors").select("*, users!user_id(full_name, email, phone)").order("created_at", { ascending: false });
+/mnt/data/fix26/controllers/adminController.js:26:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:32:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:54:      .update({ status: "rejected", rejection_reason: reason, reviewed_by: req.user.id, reviewed_at: new Date().toISOString() })
+/mnt/data/fix26/controllers/adminController.js:55:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:61:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:69:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix26/controllers/adminController.js:72:      actor_id: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:73:      target_id: req.params.id,
+/mnt/data/fix26/controllers/adminController.js:102:        suspended_by: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:105:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:111:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:119:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix26/controllers/adminController.js:122:      actor_id: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:123:      target_id: req.params.id,
+/mnt/data/fix26/controllers/adminController.js:142:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:153:      .eq("id", req.params.id);
+/mnt/data/fix26/controllers/adminController.js:157:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:165:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix26/controllers/adminController.js:168:      actor_id: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:169:      target_id: req.params.id,
+/mnt/data/fix26/controllers/adminController.js:183:    let query = adminClient.from("riders").select("*, users!user_id(full_name, email, phone)").order("created_at", { ascending: false });
+/mnt/data/fix26/controllers/adminController.js:209:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:235:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:242:      await adminClient.from("rider_verification_logs").insert({
+/mnt/data/fix26/controllers/adminController.js:248:        error_message: `MANUAL OVERRIDE by admin (user ${req.user.id}): ${override_reason || "no reason given"}`,
+/mnt/data/fix26/controllers/adminController.js:253:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:276:      .update({ status: "rejected", rejection_reason: reason, reviewed_by: req.user.id, reviewed_at: new Date().toISOString() })
+/mnt/data/fix26/controllers/adminController.js:277:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:283:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:302:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:309:    await adminClient.from("riders").update(updates).eq("id", req.params.id);
+/mnt/data/fix26/controllers/adminController.js:312:      await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:391:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:404:    const { data: claimed, error: claimErr } = await adminClient.rpc("claim_dispute_for_resolution", {
+/mnt/data/fix26/controllers/adminController.js:430:          admin_reviewer_id: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:445:        await adminClient.from("disputes").update({ status: "open" }).eq("id", dispute.id);
+/mnt/data/fix26/controllers/adminController.js:454:    const { error: updateError } = await adminClient.from("disputes").update({
+/mnt/data/fix26/controllers/adminController.js:459:    }).eq("id", req.params.id);
+/mnt/data/fix26/controllers/adminController.js:463:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:505:    let query = adminClient.from("users").select("id").eq("is_active", true);
+/mnt/data/fix26/controllers/adminController.js:524:    const { error: insertError } = await adminClient.from("notifications").insert(rows);
+/mnt/data/fix26/controllers/adminController.js:527:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix26/controllers/adminController.js:530:      actor_id: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:566:        created_by: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:573:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix26/controllers/adminController.js:576:      actor_id: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:614:      .eq("id", req.params.id);
+/mnt/data/fix26/controllers/adminController.js:626:      adminClient.from("vendors").select("id, status", { count: "exact" }),
+/mnt/data/fix26/controllers/adminController.js:627:      adminClient.from("riders").select("id, status", { count: "exact" }),
+/mnt/data/fix26/controllers/adminController.js:628:      adminClient.from("orders").select("id, status, total, created_at", { count: "exact" }),
+/mnt/data/fix26/controllers/adminController.js:629:      adminClient.from("payments").select("amount, status"),
+/mnt/data/fix26/controllers/adminController.js:675:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/adminController.js:685:      sender_id: req.user.id,
+/mnt/data/fix26/controllers/adminController.js:690:    await adminClient.from("support_tickets").update({ messages, status: "IN_PROGRESS" }).eq("id", req.params.id);
+/mnt/data/fix26/controllers/adminController.js:692:    await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/adminController.js:713:    const { data, error } = await adminClient.rpc("reconcile_balances");
+/mnt/data/fix26/controllers/adminController.js:798:      initiatedByUserId: req.user.id,
+/mnt/data/fix26/controllers/supportController.js:27:    const { data, error } = await adminClient.from("support_tickets").insert({
+/mnt/data/fix26/controllers/supportController.js:29:      user_id: req.user.id,
+/mnt/data/fix26/controllers/supportController.js:30:      role: req.user.role,
+/mnt/data/fix26/controllers/supportController.js:45:        ? `URGENT: ${req.user.role} needs immediate help. Reason may involve: ${subject}`
+/mnt/data/fix26/controllers/supportController.js:46:        : `New ${priority} priority ticket from ${req.user.role}.`
+/mnt/data/fix26/controllers/supportController.js:67:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/supportController.js:81:    const { data: ticket } = await adminClient.from("support_tickets").select("id, messages, user_id").eq("id", req.params.id).single();
+/mnt/data/fix26/controllers/supportController.js:84:    if (ticket.user_id !== req.user.id && req.user.role !== "admin") {
+/mnt/data/fix26/controllers/supportController.js:89:    messages.push({ sender: req.user.role, sender_id: req.user.id, message, sent_at: new Date().toISOString() });
+/mnt/data/fix26/controllers/supportController.js:91:    await adminClient.from("support_tickets").update({ messages, status: "IN_PROGRESS" }).eq("id", req.params.id);
+/mnt/data/fix26/controllers/receiptController.js:87:  const { data, error } = await adminClient.from("receipts").insert({
+/mnt/data/fix26/controllers/receiptController.js:122:      .eq("receipt_id", req.params.id)
+/mnt/data/fix26/controllers/receiptController.js:123:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/receiptController.js:179:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/receiptController.js:196:    const { data, error } = await adminClient.from("receipts").select("id, receipt_id, type, reference_id, created_at").eq("user_id", req.user.id).order("created_at", { ascending: false });
+/mnt/data/fix26/controllers/receiptController.js:204:    const { data, error } = await adminClient.from("receipts").select("*").eq("receipt_id", req.params.id).eq("user_id", req.user.id).single();
+/mnt/data/fix26/controllers/paymentController.js:136:    const { data: credited, error: creditError } = await adminClient.rpc("credit_platform_revenue", {
+/mnt/data/fix26/controllers/paymentController.js:151:      await adminClient.from("audit_logs").insert({
+/mnt/data/fix26/controllers/paymentController.js:165:  const { error: ledgerError } = await adminClient.from("ledger_entries").insert({
+/mnt/data/fix26/controllers/paymentController.js:179:  await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/paymentController.js:187:  const { data: subOrders } = await adminClient.from("sub_orders").select("vendor_id, vendors(user_id)").eq("order_id", orderId);
+/mnt/data/fix26/controllers/paymentController.js:196:    await adminClient.from("notifications").insert(notifications);
+/mnt/data/fix26/controllers/paymentController.js:234:    const { data: order, error } = await adminClient.from("orders").select("id, total, customer_id, status, payment_status, paystack_reference").eq("id", order_id).single();
+/mnt/data/fix26/controllers/paymentController.js:236:    if (order.customer_id !== req.user.id) return res.status(403).json({ success: false, message: "Not authorized." });
+/mnt/data/fix26/controllers/paymentController.js:240:      const { data: existingPayment } = await adminClient.from("payments").select("status, paystack_reference").eq("order_id", order_id).single();
+/mnt/data/fix26/controllers/paymentController.js:253:    const { error: paymentInsertError } = await adminClient.from("payments").insert({
+/mnt/data/fix26/controllers/paymentController.js:266:        email: req.user.email,
+/mnt/data/fix26/controllers/paymentController.js:269:        metadata: { order_id, customer_id: req.user.id, cartmoove: true },
+/mnt/data/fix26/controllers/paymentController.js:277:      await adminClient.from("payments").update({
+/mnt/data/fix26/controllers/paymentController.js:312:    const { data: existingPayment } = await adminClient.from("payments").select("id, status, order_id, paystack_fee, processing_completed_at").eq("paystack_reference", reference).single();
+/mnt/data/fix26/controllers/paymentController.js:322:        await applyPaymentSideEffects(existingPayment.id, existingPayment.order_id, req.user.id, Number(existingPayment.paystack_fee || 0));
+/mnt/data/fix26/controllers/paymentController.js:331:      await adminClient.from("payments").update({ status: "failed" }).eq("paystack_reference", reference);
+/mnt/data/fix26/controllers/paymentController.js:335:    await processSuccessfulPayment(metadata.order_id, reference, req.user.id, fees);
+/mnt/data/fix26/controllers/paymentController.js:348:  const { data: completed, error: completionError } = await adminClient.rpc("complete_vendor_rider_withdrawal", {
+/mnt/data/fix26/controllers/paymentController.js:355:  const { error: notificationError } = await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/paymentController.js:371:  const { data: failed, error: failureError } = await adminClient.rpc("fail_vendor_rider_withdrawal", {
+/mnt/data/fix26/controllers/paymentController.js:381:  const { error: notificationError } = await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/paymentController.js:406:      let query = adminClient.from("platform_withdrawals").select("id, amount, status, paystack_reference").limit(1);
+/mnt/data/fix26/controllers/paymentController.js:419:          await adminClient.rpc("complete_platform_withdrawal", {
+/mnt/data/fix26/controllers/paymentController.js:428:          await adminClient.rpc("fail_platform_withdrawal", {
+/mnt/data/fix26/controllers/paymentController.js:442:      let vrQuery = adminClient.from("withdrawals").select("id, status, requester_id, gross_amount, withdrawal_fee, net_payout, account_name").limit(1);
+/mnt/data/fix26/controllers/paymentController.js:485:          await adminClient.from("promotions_funding_transactions")
+/mnt/data/fix26/controllers/paymentController.js:492:        await adminClient.rpc("complete_promotions_funding", {
+/mnt/data/fix26/controllers/paymentController.js:522:      let query = adminClient.from("refunds").select("id, status, paystack_refund_id").limit(1);
+/mnt/data/fix26/controllers/paymentController.js:544:        await adminClient.from("refunds").update({
+/mnt/data/fix26/controllers/paymentController.js:551:        await adminClient.from("refunds").update({
+/mnt/data/fix26/controllers/paymentController.js:558:        await adminClient.from("refunds").update({
+/mnt/data/fix26/controllers/authController.js:169:        await adminClient.from("policy_acceptances").insert({
+/mnt/data/fix26/controllers/authController.js:189:    await adminClient.from("onboarding_progress").insert({
+/mnt/data/fix26/controllers/authController.js:196:    await adminClient.from("notification_preferences").insert({
+/mnt/data/fix26/controllers/authController.js:341:        await adminClient.from("users").update({ totp_backup_codes: remainingBackupCodes }).eq("id", user.id);
+/mnt/data/fix26/controllers/authController.js:371:    if (req.user.role !== "admin") {
+/mnt/data/fix26/controllers/authController.js:374:    if (req.user.totp_enabled) {
+/mnt/data/fix26/controllers/authController.js:379:    const otpauthUrl = totpService.buildOtpAuthUrl(secret, req.user.email);
+/mnt/data/fix26/controllers/authController.js:382:    await adminClient.from("users").update({ totp_secret: secret }).eq("id", req.user.id);
+/mnt/data/fix26/controllers/authController.js:406:      .eq("id", req.user.id)
+/mnt/data/fix26/controllers/authController.js:450:      .eq("id", req.user.id)
+/mnt/data/fix26/controllers/authController.js:482:      .eq("id", req.user.id)
+/mnt/data/fix26/controllers/authController.js:508:      .eq("id", req.user.id)
+/mnt/data/fix26/controllers/authController.js:517:    await adminClient.from("users").update({ password_hash }).eq("id", req.user.id);
+/mnt/data/fix26/controllers/uploadController.js:146:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/uploadController.js:155:      prefix: req.user.id,
+/mnt/data/fix26/controllers/uploadController.js:171:    if (req.user.role !== "customer") {
+/mnt/data/fix26/controllers/uploadController.js:179:      prefix: req.user.id,
+/mnt/data/fix26/controllers/uploadController.js:197:    if (req.user.role !== "customer") {
+/mnt/data/fix26/controllers/uploadController.js:205:      prefix: req.user.id,
+/mnt/data/fix26/controllers/uploadController.js:225:    if (req.user.role !== "vendor") {
+/mnt/data/fix26/controllers/uploadController.js:230:    const { data: vendor } = await adminClient.from("vendors").select("id").eq("user_id", req.user.id).single();
+/mnt/data/fix26/controllers/uploadController.js:244:    const { error: updateError } = await adminClient.from("vendors").update({ logo_url }).eq("id", vendor.id);
+/mnt/data/fix26/controllers/uploadController.js:260:    if (req.user.role !== "admin") {
+/mnt/data/fix26/controllers/uploadController.js:305:      const filename = `${req.user.id}/${uuidv4()}.webm`;
+/mnt/data/fix26/controllers/deliveryController.js:4:  const { data } = await adminClient.from("delivery_settings").select("*").eq("region_id", region_id).single();
+/mnt/data/fix26/controllers/deliveryController.js:105:    const { data: vendor } = await adminClient.from("vendors").select("id, business_name, region_id, location_lat, location_lng, delivery_radius_km").eq("id", vendor_id).single();
+/mnt/data/fix26/controllers/deliveryController.js:195:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix26/controllers/deliveryController.js:198:      actor_id: req.user.id,
+/mnt/data/fix26/controllers/deliveryController.js:216:    await adminClient.from("audit_logs").insert({
+/mnt/data/fix26/controllers/deliveryController.js:219:      actor_id: req.user.id,
+/mnt/data/fix26/controllers/notificationController.js:9:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/notificationController.js:27:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/notificationController.js:28:      .eq("user_id", req.user.id);
+/mnt/data/fix26/controllers/notificationController.js:42:      .eq("user_id", req.user.id)
+/mnt/data/fix26/controllers/notificationController.js:64:      .in("category", [req.user.role, "all"])
+/mnt/data/fix26/controllers/orderController.js:25:    if (req.user.role === "vendor") {
+/mnt/data/fix26/controllers/orderController.js:26:      const { data: vendor } = await adminClient.from("vendors").select("id").eq("user_id", req.user.id).single();
+/mnt/data/fix26/controllers/orderController.js:28:      const { data: subOrders } = await adminClient.from("sub_orders").select("order_id").eq("vendor_id", vendor.id);
+/mnt/data/fix26/controllers/orderController.js:30:    } else if (req.user.role === "rider") {
+/mnt/data/fix26/controllers/orderController.js:31:      const { data: rider } = await adminClient.from("riders").select("id").eq("user_id", req.user.id).single();
+/mnt/data/fix26/controllers/orderController.js:33:      const { data: subOrders } = await adminClient.from("sub_orders").select("order_id").eq("rider_id", rider.id);
+/mnt/data/fix26/controllers/orderController.js:37:    let query = adminClient.from("orders").select("*").order("created_at", { ascending: false });
+/mnt/data/fix26/controllers/orderController.js:39:    if (req.user.role === "customer") {
+/mnt/data/fix26/controllers/orderController.js:40:      query = query.eq("customer_id", req.user.id);
+/mnt/data/fix26/controllers/orderController.js:61:      .eq("id", req.params.id)
+/mnt/data/fix26/controllers/orderController.js:70:    if (req.user.role === "customer") {
+/mnt/data/fix26/controllers/orderController.js:71:      if (order.customer_id !== req.user.id) {
+/mnt/data/fix26/controllers/orderController.js:74:    } else if (req.user.role === "vendor") {
+/mnt/data/fix26/controllers/orderController.js:75:      const { data: vendor } = await adminClient.from("vendors").select("id").eq("user_id", req.user.id).single();
+/mnt/data/fix26/controllers/orderController.js:78:    } else if (req.user.role === "rider") {
+/mnt/data/fix26/controllers/orderController.js:79:      const { data: rider } = await adminClient.from("riders").select("id").eq("user_id", req.user.id).single();
+/mnt/data/fix26/controllers/orderController.js:82:    } else if (req.user.role !== "admin") {
+/mnt/data/fix26/controllers/subOrderController.js:42:    const { data: reservationId, error: reserveError } = await adminClient.rpc(
+/mnt/data/fix26/controllers/subOrderController.js:130:    const { error: releaseError } = await adminClient.rpc(
+/mnt/data/fix26/controllers/subOrderController.js:156:    const { error: confirmError } = await adminClient.rpc(
+/mnt/data/fix26/controllers/subOrderController.js:433:        customerId: req.user.id,
+/mnt/data/fix26/controllers/subOrderController.js:465:          customerId: req.user.id,
+/mnt/data/fix26/controllers/subOrderController.js:503:        actorId: req.user.id,
+/mnt/data/fix26/controllers/subOrderController.js:566:      const { error } = await adminClient.rpc("create_order_with_sub_orders", {
+/mnt/data/fix26/controllers/subOrderController.js:569:          customer_id: req.user.id,
+/mnt/data/fix26/controllers/subOrderController.js:610:    await adminClient.from("ledger_entries").insert({
+/mnt/data/fix26/controllers/subOrderController.js:619:      actor_id: req.user.id,
+/mnt/data/fix26/controllers/subOrderController.js:682:      .eq("id", req.params.orderId)
+/mnt/data/fix26/controllers/subOrderController.js:683:      .eq("customer_id", req.user.id)
+/mnt/data/fix26/controllers/subOrderController.js:693:      .eq("order_id", req.params.orderId);
+/mnt/data/fix26/controllers/subOrderController.js:725:    const role = req.user.role;
+/mnt/data/fix26/controllers/subOrderController.js:745:      const { data: vendor } = await adminClient.from("vendors").select("id").eq("user_id", req.user.id).single();
+/mnt/data/fix26/controllers/subOrderController.js:750:      const { data: rider } = await adminClient.from("riders").select("id").eq("user_id", req.user.id).single();
+/mnt/data/fix26/controllers/subOrderController.js:755:      const { data: parentOrder } = await adminClient.from("orders").select("customer_id").eq("id", subOrder.order_id).single();
+/mnt/data/fix26/controllers/subOrderController.js:756:      if (!parentOrder || parentOrder.customer_id !== req.user.id) {
+/mnt/data/fix26/controllers/subOrderController.js:823:    const { data: claimed, error: claimErr } = await adminClient.rpc("claim_sub_order_transition", {
+/mnt/data/fix26/controllers/subOrderController.js:843:      await adminClient.from("sub_orders").update(remainingUpdates).eq("id", req.params.subOrderId);
+/mnt/data/fix26/controllers/subOrderController.js:851:      const { error: deliveryFinancialsError } = await adminClient.rpc(
+/mnt/data/fix26/controllers/subOrderController.js:853:        { p_sub_order_id: subOrder.id, p_actor_id: req.user.id }
+/mnt/data/fix26/controllers/subOrderController.js:878:            initiatedByUserId: req.user.id,
+/mnt/data/fix26/controllers/subOrderController.js:923:          const { data: milestoneResult, error: referralError } = await adminClient.rpc(
+/mnt/data/fix26/controllers/subOrderController.js:932:            await adminClient.from("admin_alerts").insert({
+/mnt/data/fix26/controllers/subOrderController.js:953:      await adminClient.from("orders").update({ status: STATUSES.CANCELLED }).eq("id", subOrder.order_id);
+/mnt/data/fix26/controllers/subOrderController.js:964:      await adminClient.from("notifications").insert({
+/mnt/data/fix26/controllers/subOrderController.js:997:    const { data: parentOrder } = await adminClient.from("orders").select("customer_id").eq("id", subOrder.order_id).single();
+/mnt/data/fix26/controllers/subOrderController.js:998:    if (!parentOrder || parentOrder.customer_id !== req.user.id) {
+/mnt/data/fix26/controllers/subOrderController.js:1022:    const { data: claimed, error: claimErr } = await adminClient.rpc("claim_sub_order_transition", {
+/mnt/data/fix26/controllers/subOrderController.js:1031:    await adminClient.from("sub_orders").update({ cancelled_at: new Date().toISOString() }).eq("id", req.params.subOrderId);
+/mnt/data/fix26/controllers/subOrderController.js:1052:          initiatedByUserId: req.user.id,
+/mnt/data/fix26/controllers/subOrderController.js:1082:  const { error } = await adminClient.rpc("credit_pending_balance", { p_user_id: userId, p_amount: amount });

@@ -1,0 +1,286 @@
+============================================================
+CARTMOOVE BACKEND — GPT HANDOFF PROMPT
+From: Claude (primary architect)
+To: GPT (continuing development)
+============================================================
+
+We are building Cartmoove — a regional multi-vendor marketplace
+launching in Otukpo, Nigeria. Stack: React PWA + Node.js/Express
++ Supabase (PostgreSQL) + Paystack.
+
+Below is a full account of what has been built, what was added
+in v2, and what was intentionally left out and why.
+
+============================================================
+WHAT WAS BUILT IN v1 (original backend)
+============================================================
+
+Full MVC structure with the following:
+
+Controllers:
+- authController       → register, login, getMe, changePassword
+- vendorController     → register, getAll, getById, getMe, update, earnings
+- productController    → CRUD with variant support
+- orderController      → create, list, getById, updateStatus, cancel, confirmDelivery
+- paymentController    → Paystack initialize, verify, webhook
+- riderController      → register, profile, location, availability, availableOrders, acceptOrder, earnings
+- reviewController     → create, getVendorReviews
+- disputeController    → create, getMyDisputes, appeal
+- notificationController → list, markRead, markAllRead
+- supportController    → createTicket, getMyTickets, replyToTicket
+- adminController      → full vendor/rider/order/dispute/analytics/support management
+
+Routes: 11 route files covering all the above
+Auth: JWT with role-based middleware (customer/vendor/rider/admin)
+Database: Basic schema with ~15 tables
+
+============================================================
+WHAT WAS ADDED IN v2
+============================================================
+
+1. WITHDRAWAL SYSTEM (withdrawalController.js + routes/withdrawals.js)
+
+   Full withdrawal flow with fee logic:
+   - 1% withdrawal fee with configurable fee cap (default ₦2,000)
+   - Fee cap protection: vendors/riders paying large withdrawals
+     never pay more than the cap
+   - Fee preview endpoint before submitting
+   - Separate vendor and rider withdrawal flows
+   - Pending → Admin Approved → Completed flow
+   - Admin can reject with reason
+   - Ledger entries created on every withdrawal action
+   - Audit logs on every admin action
+   - Notifications to requester on approval and rejection
+   - Duplicate withdrawal prevention (no two PENDING at once)
+   - Fee settings updatable by admin from dashboard
+   - Stores: gross_amount, withdrawal_fee, net_payout,
+     fee_percentage, fee_cap, fee_was_capped, bank details,
+     proof_of_payout, timestamps, reviewer ID
+
+2. DELIVERY PRICING SYSTEM (deliveryController.js + routes/delivery.js)
+
+   Formula: (Base Fee + (Distance × Rate Per KM)) × Fuel Multiplier
+   - Haversine distance calculation (road distance approximation)
+   - All pricing settings stored in delivery_settings table per region
+   - Delivery margin tracked separately (platform cut from delivery)
+   - Rider payout = delivery_fee - delivery_margin
+   - Maximum delivery radius enforced
+   - Configurable: base_fee, rate_per_km, fuel_multiplier,
+     minimum_delivery_fee, maximum_delivery_radius,
+     delivery_margin, large_package_fee, rush_fee
+   - /api/delivery/estimate endpoint for frontend to show fee
+     before checkout
+
+3. ORDER STATE MACHINE (config/orderStateMachine.js)
+
+   Statuses:
+   PENDING_PAYMENT → PAYMENT_CONFIRMED → READY_FOR_PICKUP
+   → WAITING_RIDER → RIDER_ASSIGNED → PICKED_UP
+   → DELIVERING → DELIVERED → DISPUTED → REFUNDED
+   → CANCELLED
+
+   Rules:
+   - Only valid transitions allowed
+   - Role-based permission per transition
+   - validateTransition() helper used in order controller
+
+4. RECEIPT SYSTEM (receiptController.js + routes/receipts.js)
+
+   HTML receipts generated automatically for:
+   - Orders (customer receipt)
+   - Withdrawals
+   - Refunds
+   - (Vendor sale and rider earning receipts — extension points ready)
+
+   Features:
+   - Branded HTML template with Cartmoove styling
+   - Unique receipt IDs (RCPT-timestamp-random)
+   - Stored in receipts table with html_content
+   - Served directly as text/html via GET /api/receipts/:id
+   - PDF support left as future extension
+
+5. REGIONS TABLE
+
+   - regions table created — no hardcoded region names
+   - Otukpo seeded as launch region via SQL INSERT
+   - region_id linked to vendors, riders, sub_orders,
+     delivery_settings
+   - Supports future expansion without code changes
+
+6. SUB-ORDER ARCHITECTURE
+
+   Schema updated to support:
+   - Main orders table (one per checkout)
+   - sub_orders table (one per vendor inside an order)
+   - One cart → one payment → multiple sub-orders split by vendor
+   - Each sub-order has its own: status, rider, delivery info,
+     vendor_payout, rider_payout, delivery_margin
+   - Independent delivery, independent refunds per sub-order
+   NOTE: Sub-order controller logic not yet written —
+   only schema is in place.
+
+7. INVENTORY RESERVATIONS (schema only)
+
+   Table: inventory_reservations
+   Fields: product_id, variant_id, order_id, quantity,
+           status (reserved/confirmed/released), expires_at
+   NOTE: Reservation logic not yet wired into order controller.
+   Extension point is in place.
+
+8. BALANCES TABLE (schema only)
+
+   Single source of truth for each user's balance:
+   available_balance, pending_balance, total_earned, total_withdrawn
+   NOTE: Not yet wired up. Currently earnings are calculated
+   dynamically from orders. Balances table is ready to replace
+   this when you want a more performant system.
+
+9. LEDGER ENTRIES TABLE (schema only + used in withdrawals)
+
+   Immutable append-only log of every money movement.
+   Currently populated by withdrawal events.
+   Should be extended to cover: payments, refunds, payouts.
+
+10. UPDATED SCHEMA (supabase/schema.sql)
+
+    New tables added:
+    - regions
+    - delivery_settings
+    - fee_settings
+    - sub_orders
+    - inventory_reservations
+    - balances
+    - ledger_entries
+    - receipts
+    - faq_entries
+    - audit_logs
+    - payments (separate from transactions)
+
+    Total tables: ~25
+
+    Seeds included:
+    - Otukpo as launch region
+    - Default fee settings (5% platform, 1% withdrawal, ₦2000 cap)
+
+============================================================
+WHAT WAS INTENTIONALLY LEFT OUT AND WHY
+============================================================
+
+1. MULTI-VENDOR CART CONTROLLER
+   Schema is ready (sub_orders table exists) but the controller
+   logic that splits a cart by vendor, creates sub-orders, and
+   assigns delivery per vendor is not written yet.
+   WHY: This is the most complex piece of business logic in the
+   entire system. It needs to be built carefully and tested
+   thoroughly. It should be the next major task.
+
+2. INVENTORY RESERVATION LOGIC
+   Table exists but the actual reserve-on-checkout and
+   release-on-cancel logic is not wired into the order controller.
+   WHY: Depends on sub-order controller being built first.
+   Build order: sub-orders → then inventory reservation.
+
+3. IDEMPOTENCY KEYS ON PAYMENTS
+   The payments table has an idempotency_key column but the
+   payment controller does not yet generate or validate them.
+   WHY: Important but not blocking for MVP. Add before launch.
+   Implementation: generate UUID on client, send with payment
+   request, backend checks if key already exists before
+   creating a new payment record.
+
+4. BALANCE LEDGER WIRING
+   The balances table and ledger_entries table exist but are
+   not yet the source of truth for earnings. Currently earnings
+   are calculated by querying orders dynamically.
+   WHY: Dynamic calculation is fine for low volume MVP.
+   Switch to ledger-based balances when order volume grows.
+
+5. BACKGROUND JOBS / QUEUES
+   No queue system for: payment retries, reservation expiry,
+   auto-confirmation after 24hrs, fraud checks.
+   WHY: Overkill for MVP. Use Supabase Edge Functions with
+   pg_cron for scheduled tasks instead of a full queue system.
+   Add after launch.
+
+6. PUSH NOTIFICATION WIRING
+   In-app notifications are implemented. Push notifications
+   (PWA Web Push) are not yet wired.
+   WHY: Requires service worker setup on the frontend.
+   Build frontend first, then add push.
+
+7. EMAIL NOTIFICATIONS
+   Not yet implemented.
+   RECOMMENDATION: Use Resend + Supabase Edge Functions.
+   Add email for: order confirmations, payment receipts,
+   withdrawal completions, dispute updates, account approvals.
+   Do NOT send email for: delivery status changes, low stock,
+   promotions, rider movement.
+
+8. ANTI-FRAUD / RISK SCORING
+   No risk scores or fraud detection system.
+   WHY: Too early. You need real data before you know what
+   fraud looks like on this platform. Add after 3 months live.
+
+9. ANALYTICS AGGREGATION
+   Admin analytics endpoint exists but is basic.
+   Full analytics (daily revenue, repeat customers, cancellation
+   rates, profit estimates) not yet built.
+   WHY: Not blocking for launch. Build after you have real data.
+
+10. PDF RECEIPTS
+    HTML receipts are generated. PDF is not.
+    WHY: Requires a PDF library (Puppeteer or pdfkit) and adds
+    complexity. HTML receipts are sufficient for MVP.
+    Add PDF export post-launch.
+
+11. MULTI-ROLE ACCOUNTS
+    Single role per account only.
+    WHY: Adds significant auth and UI complexity. Leave for V2.
+    Schema can be extended later.
+
+12. SUBSCRIPTION PLANS / PROMOTIONS / FEATURED LISTINGS
+    Extension points noted in schema (plan field on vendors)
+    but no subscription billing logic.
+    WHY: Revenue priority is commissions + withdrawal fees first.
+    Subscriptions require Paystack recurring billing setup.
+
+13. RIDER FEE ADJUSTMENT ±20%
+    Delivery formula is built but rider adjustment range
+    is not implemented.
+    WHY: Adds UX complexity at checkout. Ship fixed pricing
+    first, introduce adjustment after rider feedback.
+
+14. SUPABASE RLS POLICIES
+    Tables are created but RLS policies are not yet written.
+    WHY: This is a separate critical task. Every table needs
+    its own policy. Should be written and tested before
+    any real money flows through the system.
+    PRIORITY: High. Do this before launch.
+
+============================================================
+IMMEDIATE NEXT STEPS (in order)
+============================================================
+
+1. Write sub-order controller (multi-vendor cart split logic)
+2. Wire inventory reservations into order creation
+3. Add idempotency keys to payment controller
+4. Write Supabase RLS policies for all tables
+5. Add email notifications via Resend
+6. Test full order flow end to end
+
+============================================================
+TECH STACK
+============================================================
+
+Frontend: React + Vite (PWA)
+Backend: Node.js + Express
+Database: Supabase (PostgreSQL)
+Auth: JWT (bcryptjs, jsonwebtoken)
+Payments: Paystack (not Stripe — Nigeria)
+Storage: Supabase Storage
+Deployment: Vercel (frontend) + Railway (backend)
+Identity Verification: Prembly API (rider NIN)
+
+============================================================
+END OF HANDOFF PROMPT
+============================================================

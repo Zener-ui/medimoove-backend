@@ -1,0 +1,250 @@
+/mnt/data/fix56work/controllers/couponController.js:11:// in subOrderController — platform_fee and vendor_payout are
+/mnt/data/fix56work/controllers/inventoryController.js:17:      "atomic_reserve_stock",
+/mnt/data/fix56work/controllers/inventoryController.js:35:        "atomic_reserve_variant_stock",
+/mnt/data/fix56work/controllers/feeController.js:8:      .select("platform_fee_percentage, withdrawal_fee_percentage, withdrawal_fee_cap")
+/mnt/data/fix56work/controllers/feeController.js:18:        withdrawal_fee_percentage: Number(data?.withdrawal_fee_percentage ?? 1),
+/mnt/data/fix56work/controllers/feeController.js:19:        withdrawal_fee_cap: Number(data?.withdrawal_fee_cap ?? 2000),
+/mnt/data/fix56work/controllers/riderController.js:389:    // Get balance from balances table (source of truth)
+/mnt/data/fix56work/controllers/riderController.js:390:    const { data: balance } = await adminClient
+/mnt/data/fix56work/controllers/riderController.js:391:      .from("balances")
+/mnt/data/fix56work/controllers/riderController.js:392:      .select("available_balance, pending_balance, total_earned, total_withdrawn")
+/mnt/data/fix56work/controllers/riderController.js:397:      .from("refund_liabilities")
+/mnt/data/fix56work/controllers/riderController.js:398:      .select("id, refund_id, responsible_type, original_amount, recovered_amount, status, created_at, updated_at")
+/mnt/data/fix56work/controllers/riderController.js:403:    const outstanding_refund_liability = (liabilities || []).reduce((sum, x) => sum + Number(x.original_amount || 0) - Number(x.recovered_amount || 0), 0);
+/mnt/data/fix56work/controllers/riderController.js:408:      .select("id, rider_payout, status, delivered_at, created_at, order_id")
+/mnt/data/fix56work/controllers/riderController.js:416:      available_balance: balance?.available_balance ?? 0,
+/mnt/data/fix56work/controllers/riderController.js:417:      pending_balance: balance?.pending_balance ?? 0,
+/mnt/data/fix56work/controllers/riderController.js:418:      total_earned: balance?.total_earned ?? 0,
+/mnt/data/fix56work/controllers/riderController.js:419:      total_withdrawn: balance?.total_withdrawn ?? 0,
+/mnt/data/fix56work/controllers/riderController.js:420:      outstanding_refund_liability,
+/mnt/data/fix56work/controllers/riderController.js:421:      refund_liabilities: liabilities || [],
+/mnt/data/fix56work/controllers/adminController.js:4:const { executeRefund, initiatePreDeliveryCancellationRefund } = require("./operationalController");
+/mnt/data/fix56work/controllers/adminController.js:380:      refund_type = "full",
+/mnt/data/fix56work/controllers/adminController.js:403:    // a still-open/appealed row can proceed to executeRefund at all.
+/mnt/data/fix56work/controllers/adminController.js:412:    let refundResult = null;
+/mnt/data/fix56work/controllers/adminController.js:414:    // An approved dispute now means a real Paystack refund is initiated as
+/mnt/data/fix56work/controllers/adminController.js:416:    // before Paystack accepts the refund request.
+/mnt/data/fix56work/controllers/adminController.js:418:      if (!fault_party) return res.status(400).json({ success: false, message: "Select who is responsible for the refund." });
+/mnt/data/fix56work/controllers/adminController.js:421:        refundResult = await executeRefund({
+/mnt/data/fix56work/controllers/adminController.js:426:          refund_type,
+/mnt/data/fix56work/controllers/adminController.js:431:          refund_stage: "post_delivery",
+/mnt/data/fix56work/controllers/adminController.js:436:          // on the admin's end returns the same refund instead of
+/mnt/data/fix56work/controllers/adminController.js:440:      } catch (refundError) {
+/mnt/data/fix56work/controllers/adminController.js:442:        // refund itself failed, put it back to "open" (not "resolved")
+/mnt/data/fix56work/controllers/adminController.js:448:          message: refundError.message,
+/mnt/data/fix56work/controllers/adminController.js:449:          refund_started: false,
+/mnt/data/fix56work/controllers/adminController.js:466:      title: decision === "approved" ? "Refund Initiated 💰" : "Dispute Resolved",
+/mnt/data/fix56work/controllers/adminController.js:468:        ? `Your refund of ₦${Number(refundResult.refund.amount).toLocaleString()} has been initiated and is currently ${refundResult.refund.status}.`
+/mnt/data/fix56work/controllers/adminController.js:469:        : "Your dispute was reviewed and rejected. No refund will be issued.",
+/mnt/data/fix56work/controllers/adminController.js:475:      refund_id: refundResult?.refund.id || null,
+/mnt/data/fix56work/controllers/adminController.js:476:      refund_status: refundResult?.refund.status || null,
+/mnt/data/fix56work/controllers/adminController.js:478:        ? `Dispute approved and refund initiated. Paystack status: ${refundResult.refund.status}.`
+/mnt/data/fix56work/controllers/adminController.js:706:// @route GET /api/admin/reconcile-balances
+/mnt/data/fix56work/controllers/adminController.js:707:// Surfaces reconcile_balances() (backend/supabase/atomic_functions.sql) —
+/mnt/data/fix56work/controllers/adminController.js:711:const reconcileBalances = async (req, res) => {
+/mnt/data/fix56work/controllers/adminController.js:713:    const { data, error } = await adminClient.rpc("reconcile_balances");
+/mnt/data/fix56work/controllers/adminController.js:736:// @route GET /api/admin/cancellation-refunds
+/mnt/data/fix56work/controllers/adminController.js:738:// automatic refund (initiatePreDeliveryCancellationRefund, fired from
+/mnt/data/fix56work/controllers/adminController.js:743:// order was actually paid for, and there is no refund row for it that
+/mnt/data/fix56work/controllers/adminController.js:745:const getStuckCancellationRefunds = async (req, res) => {
+/mnt/data/fix56work/controllers/adminController.js:758:    const { data: existingRefunds } = await adminClient
+/mnt/data/fix56work/controllers/adminController.js:759:      .from("refunds")
+/mnt/data/fix56work/controllers/adminController.js:764:    const handledIds = new Set((existingRefunds || []).map((r) => r.sub_order_id));
+/mnt/data/fix56work/controllers/adminController.js:771:        refundable_amount: Number(s.subtotal || 0) + Number(s.platform_fee || 0) + Number(s.delivery_fee || 0),
+/mnt/data/fix56work/controllers/adminController.js:781:// @route POST /api/admin/cancellation-refunds/:subOrderId/retry
+/mnt/data/fix56work/controllers/adminController.js:782:const retryCancellationRefund = async (req, res) => {
+/mnt/data/fix56work/controllers/adminController.js:786:      .select("id, status, order_id, vendor_id, subtotal, platform_fee, delivery_fee, vendor_payout, rider_payout, rider_id")
+/mnt/data/fix56work/controllers/adminController.js:795:    const result = await initiatePreDeliveryCancellationRefund({
+/mnt/data/fix56work/controllers/adminController.js:801:    res.json({ success: true, message: "Refund re-initiated.", refund: result?.refund });
+/mnt/data/fix56work/controllers/adminController.js:812:  reconcileBalances,
+/mnt/data/fix56work/controllers/adminController.js:814:  getStuckCancellationRefunds,
+/mnt/data/fix56work/controllers/adminController.js:815:  retryCancellationRefund,
+/mnt/data/fix56work/controllers/supportController.js:4:const ESCALATE_IMMEDIATELY = ["refund", "fraud", "payment", "wrong item", "damaged", "safety", "dispute", "stolen"];
+/mnt/data/fix56work/controllers/receiptController.js:58:  if (type === "WITHDRAWAL") {
+/mnt/data/fix56work/controllers/receiptController.js:62:      <div class="row"><span>Withdrawal Fee (${escapeHtml(String(data.fee_percentage))}%)</span><span>-₦${Number(data.withdrawal_fee)?.toLocaleString()}</span></div>
+/mnt/data/fix56work/controllers/receiptController.js:63:      <div class="total-row"><span>Net Payout</span><span>₦${Number(data.net_payout)?.toLocaleString()}</span></div>
+/mnt/data/fix56work/controllers/receiptController.js:66:      <div class="footer">Fidelx Withdrawal Receipt</div>
+/mnt/data/fix56work/controllers/receiptController.js:70:  if (type === "REFUND") {
+/mnt/data/fix56work/controllers/receiptController.js:74:      <div class="row"><span>Refund Reason</span><span>${escapeHtml(data.reason)}</span></div>
+/mnt/data/fix56work/controllers/receiptController.js:75:      <div class="total-row"><span>Refund Amount</span><span>₦${Number(data.amount)?.toLocaleString()}</span></div>
+/mnt/data/fix56work/controllers/receiptController.js:76:      <div class="footer">Refund processed by Fidelx Support</div>
+/mnt/data/fix56work/controllers/receiptController.js:167:// The frontend has an order/withdrawal/refund's own ID (reference_id),
+/mnt/data/fix56work/controllers/paymentController.js:7:const { finalizeProcessedRefund } = require("./operationalController");
+/mnt/data/fix56work/controllers/paymentController.js:34:  // side effect below (ledger entry, notifications, receipt) a second
+/mnt/data/fix56work/controllers/paymentController.js:84:// status twice) or explicitly guarded (credit_platform_revenue's own
+/mnt/data/fix56work/controllers/paymentController.js:86:// ledger insert's (reference,type) unique index). The two genuinely
+/mnt/data/fix56work/controllers/paymentController.js:127:  // vendor's or rider's payout — both are computed independently and
+/mnt/data/fix56work/controllers/paymentController.js:136:    const { data: credited, error: creditError } = await adminClient.rpc("credit_platform_revenue", {
+/mnt/data/fix56work/controllers/paymentController.js:153:        action: "PLATFORM_FEE_CREDIT_FAILED",
+/mnt/data/fix56work/controllers/paymentController.js:165:  const { error: ledgerError } = await adminClient.from("ledger_entries").insert({
+/mnt/data/fix56work/controllers/paymentController.js:177:  if (ledgerError && ledgerError.code !== "23505") throw ledgerError;
+/mnt/data/fix56work/controllers/paymentController.js:244:    // unmatched/refunded manually.
+/mnt/data/fix56work/controllers/paymentController.js:404:const completeVendorRiderWithdrawal = async (withdrawal, paystackStatus = "success") => {
+/mnt/data/fix56work/controllers/paymentController.js:405:  // Complete the withdrawal and every money-side effect in ONE database
+/mnt/data/fix56work/controllers/paymentController.js:407:  // first, then updated total_withdrawn / ledger / fee revenue in separate
+/mnt/data/fix56work/controllers/paymentController.js:410:  const { data: completed, error: completionError } = await adminClient.rpc("complete_vendor_rider_withdrawal", {
+/mnt/data/fix56work/controllers/paymentController.js:411:    p_withdrawal_id: withdrawal.id,
+/mnt/data/fix56work/controllers/paymentController.js:418:    id: uuidv4(), user_id: withdrawal.requester_id, title: "Withdrawal Completed",
+/mnt/data/fix56work/controllers/paymentController.js:419:    body: `Your withdrawal of ₦${Number(withdrawal.net_payout).toLocaleString()} has been sent to your bank account.`, is_read: false,
+/mnt/data/fix56work/controllers/paymentController.js:421:  if (notificationError) console.warn("[WITHDRAWAL] Completion notification failed:", notificationError.message);
+/mnt/data/fix56work/controllers/paymentController.js:425:const failVendorRiderWithdrawal = async (withdrawal, paystackStatus, reason) => {
+/mnt/data/fix56work/controllers/paymentController.js:427:  // PROCESSING -> FAILED first and restored the user's balance in a
+/mnt/data/fix56work/controllers/paymentController.js:429:  // deducted the balance, and a retry could not repair it because the
+/mnt/data/fix56work/controllers/paymentController.js:430:  // withdrawal was already FAILED. The RPC performs both operations in
+/mnt/data/fix56work/controllers/paymentController.js:433:  const { data: failed, error: failureError } = await adminClient.rpc("fail_vendor_rider_withdrawal", {
+/mnt/data/fix56work/controllers/paymentController.js:434:    p_withdrawal_id: withdrawal.id,
+/mnt/data/fix56work/controllers/paymentController.js:442:  // notification failure must never roll back or block the balance restore.
+/mnt/data/fix56work/controllers/paymentController.js:444:    id: uuidv4(), user_id: withdrawal.requester_id, title: "Withdrawal Failed",
+/mnt/data/fix56work/controllers/paymentController.js:445:    body: `Your withdrawal could not be completed by Paystack. Your balance has been restored — please try again or contact support.`, is_read: false,
+/mnt/data/fix56work/controllers/paymentController.js:447:  if (notificationError) console.warn("[WITHDRAWAL] Failure notification failed:", notificationError.message);
+/mnt/data/fix56work/controllers/paymentController.js:463:    if (["transfer.success", "transfer.failed", "transfer.reversed"].includes(event.event)) {
+/mnt/data/fix56work/controllers/paymentController.js:465:      const transferId = data.id ? String(data.id) : null;
+/mnt/data/fix56work/controllers/paymentController.js:468:      // Never query platform withdrawals without a trustworthy identifier.
+/mnt/data/fix56work/controllers/paymentController.js:469:      // A malformed/unexpected transfer webhook used to fall through with an
+/mnt/data/fix56work/controllers/paymentController.js:471:      // platform withdrawal.
+/mnt/data/fix56work/controllers/paymentController.js:472:      let platformWithdrawal = null;
+/mnt/data/fix56work/controllers/paymentController.js:473:      if (transferId || (reference && reference.startsWith("cartmoove-platform-"))) {
+/mnt/data/fix56work/controllers/paymentController.js:474:        let query = adminClient.from("platform_withdrawals").select("id, amount, status, paystack_reference").limit(1);
+/mnt/data/fix56work/controllers/paymentController.js:475:        if (transferId) query = query.eq("paystack_transfer_id", transferId);
+/mnt/data/fix56work/controllers/paymentController.js:480:        platformWithdrawal = data;
+/mnt/data/fix56work/controllers/paymentController.js:483:      if (platformWithdrawal) {
+/mnt/data/fix56work/controllers/paymentController.js:484:        if (event.event === "transfer.success") {
+/mnt/data/fix56work/controllers/paymentController.js:488:          await adminClient.rpc("complete_platform_withdrawal", {
+/mnt/data/fix56work/controllers/paymentController.js:489:            p_withdrawal_id: platformWithdrawal.id,
+/mnt/data/fix56work/controllers/paymentController.js:493:          // Failure must restore the balance and mark the withdrawal failed
+/mnt/data/fix56work/controllers/paymentController.js:496:          // same platform balance more than once.
+/mnt/data/fix56work/controllers/paymentController.js:497:          await adminClient.rpc("fail_platform_withdrawal", {
+/mnt/data/fix56work/controllers/paymentController.js:498:            p_withdrawal_id: platformWithdrawal.id,
+/mnt/data/fix56work/controllers/paymentController.js:499:            p_failure_reason: data.reason || `Paystack transfer ${event.event}`,
+/mnt/data/fix56work/controllers/paymentController.js:506:      // Not a platform withdrawal — check vendor/rider withdrawals.
+/mnt/data/fix56work/controllers/paymentController.js:508:      // above unconditionally, so a transfer.success/transfer.failed
+/mnt/data/fix56work/controllers/paymentController.js:509:      // event for a vendor/rider withdrawal was silently discarded and
+/mnt/data/fix56work/controllers/paymentController.js:510:      // the withdrawal stayed stuck on PROCESSING forever.
+/mnt/data/fix56work/controllers/paymentController.js:511:      let vrQuery = adminClient.from("withdrawals").select("id, status, requester_id, gross_amount, withdrawal_fee, net_payout, account_name").limit(1);
+/mnt/data/fix56work/controllers/paymentController.js:512:      if (transferId) vrQuery = vrQuery.eq("paystack_transfer_id", transferId);
+/mnt/data/fix56work/controllers/paymentController.js:516:      const { data: withdrawal } = await vrQuery.maybeSingle();
+/mnt/data/fix56work/controllers/paymentController.js:517:      if (!withdrawal) return res.sendStatus(200);
+/mnt/data/fix56work/controllers/paymentController.js:519:      if (event.event === "transfer.success") {
+/mnt/data/fix56work/controllers/paymentController.js:523:        await completeVendorRiderWithdrawal(withdrawal, data.status || event.event);
+/mnt/data/fix56work/controllers/paymentController.js:525:        await failVendorRiderWithdrawal(
+/mnt/data/fix56work/controllers/paymentController.js:526:          withdrawal,
+/mnt/data/fix56work/controllers/paymentController.js:528:          data.reason || `Paystack transfer ${event.event}`
+/mnt/data/fix56work/controllers/paymentController.js:570:      // credit_platform_revenue's p_actor_id (a UUID column). Postgres
+/mnt/data/fix56work/controllers/paymentController.js:578:    const refundEvents = new Set([
+/mnt/data/fix56work/controllers/paymentController.js:579:      "refund.pending",
+/mnt/data/fix56work/controllers/paymentController.js:580:      "refund.processing",
+/mnt/data/fix56work/controllers/paymentController.js:581:      "refund.needs-attention",
+/mnt/data/fix56work/controllers/paymentController.js:582:      "refund.failed",
+/mnt/data/fix56work/controllers/paymentController.js:583:      "refund.processed",
+/mnt/data/fix56work/controllers/paymentController.js:586:    if (refundEvents.has(event.event)) {
+/mnt/data/fix56work/controllers/paymentController.js:588:      const refundReference = data.refund_reference || data.id || null;
+/mnt/data/fix56work/controllers/paymentController.js:591:      let query = adminClient.from("refunds").select("id, status, paystack_refund_id").limit(1);
+/mnt/data/fix56work/controllers/paymentController.js:592:      if (refundReference) {
+/mnt/data/fix56work/controllers/paymentController.js:593:        query = query.eq("paystack_refund_id", String(refundReference));
+/mnt/data/fix56work/controllers/paymentController.js:600:      const { data: refund } = await query.maybeSingle();
+/mnt/data/fix56work/controllers/paymentController.js:601:      if (!refund) return res.sendStatus(200);
+/mnt/data/fix56work/controllers/paymentController.js:604:        "refund.pending": "pending",
+/mnt/data/fix56work/controllers/paymentController.js:605:        "refund.processing": "processing",
+/mnt/data/fix56work/controllers/paymentController.js:606:        "refund.needs-attention": "needs_attention",
+/mnt/data/fix56work/controllers/paymentController.js:607:        "refund.failed": "failed",
+/mnt/data/fix56work/controllers/paymentController.js:608:        "refund.processed": "processed",
+/mnt/data/fix56work/controllers/paymentController.js:613:      // an older/intermediate event move a refund backwards after a terminal
+/mnt/data/fix56work/controllers/paymentController.js:615:      // refund.failed/refund.processing event must not overwrite a refund that
+/mnt/data/fix56work/controllers/paymentController.js:617:      // event is still allowed to advance a previously-failed refund because
+/mnt/data/fix56work/controllers/paymentController.js:619:      if (refund.status === "processed") {
+/mnt/data/fix56work/controllers/paymentController.js:623:          await finalizeProcessedRefund(refund.id);
+/mnt/data/fix56work/controllers/paymentController.js:626:        // Do not downgrade an already-processed refund. The conditional
+/mnt/data/fix56work/controllers/paymentController.js:628:        await adminClient.from("refunds").update({
+/mnt/data/fix56work/controllers/paymentController.js:631:          failure_reason: data.reason || data.message || "Paystack refund failed.",
+/mnt/data/fix56work/controllers/paymentController.js:633:        }).eq("id", refund.id).neq("status", "processed");
+/mnt/data/fix56work/controllers/paymentController.js:635:        await adminClient.from("refunds").update({
+/mnt/data/fix56work/controllers/paymentController.js:639:        }).eq("id", refund.id).neq("status", "processed");
+/mnt/data/fix56work/controllers/paymentController.js:640:        await finalizeProcessedRefund(refund.id);
+/mnt/data/fix56work/controllers/paymentController.js:641:      } else if (refund.status !== "failed") {
+/mnt/data/fix56work/controllers/paymentController.js:643:        // event is handled above and can still settle the refund.
+/mnt/data/fix56work/controllers/paymentController.js:644:        await adminClient.from("refunds").update({
+/mnt/data/fix56work/controllers/paymentController.js:647:        }).eq("id", refund.id).not("status", "in", "(failed,processed)");
+/mnt/data/fix56work/controllers/paymentController.js:658:module.exports = { initializePayment, verifyPayment, paystackWebhook, processSuccessfulPayment, applyPaymentSideEffects, completeVendorRiderWithdrawal, failVendorRiderWithdrawal };
+/mnt/data/fix56work/controllers/deliveryController.js:56:      rider_payout: manual_override_fee - delivery_margin,
+/mnt/data/fix56work/controllers/deliveryController.js:79:  const rider_payout = fee - delivery_margin;
+/mnt/data/fix56work/controllers/deliveryController.js:84:    rider_payout,
+/mnt/data/fix56work/controllers/subOrderController.js:6:const { spendFromPromotionsBudget, refundToPromotionsBudget } = require("./promotionsController");
+/mnt/data/fix56work/controllers/subOrderController.js:7:const { initiatePreDeliveryCancellationRefund } = require("./operationalController");
+/mnt/data/fix56work/controllers/subOrderController.js:379:        let riderPayout = 0;
+/mnt/data/fix56work/controllers/subOrderController.js:397:          riderPayout = calc.rider_payout;
+/mnt/data/fix56work/controllers/subOrderController.js:410:          rider_payout: riderPayout,
+/mnt/data/fix56work/controllers/subOrderController.js:411:          vendor_payout: groupSubtotal, // Vendor gets full product price
+/mnt/data/fix56work/controllers/subOrderController.js:420:    // customer-facing total; platform_fee and vendor_payout above were
+/mnt/data/fix56work/controllers/subOrderController.js:494:    // vendor_payout stay exactly as computed above (undiscounted) —
+/mnt/data/fix56work/controllers/subOrderController.js:518:    // already individually atomic (atomic_reserve_stock), and we need
+/mnt/data/fix56work/controllers/subOrderController.js:529:      const withdrawalAvailableAt = new Date();
+/mnt/data/fix56work/controllers/subOrderController.js:530:      withdrawalAvailableAt.setHours(withdrawalAvailableAt.getHours() + 1); // matches the DELIVERED-time value; overwritten there regardless
+/mnt/data/fix56work/controllers/subOrderController.js:546:        vendor_payout: group.vendor_payout,
+/mnt/data/fix56work/controllers/subOrderController.js:547:        rider_payout: group.rider_payout,
+/mnt/data/fix56work/controllers/subOrderController.js:548:        withdrawal_available_at: withdrawalAvailableAt.toISOString(),
+/mnt/data/fix56work/controllers/subOrderController.js:598:        await refundToPromotionsBudget({ reference: mainOrderId, type: "COUPON_DISCOUNT" });
+/mnt/data/fix56work/controllers/subOrderController.js:605:    // Ledger entry for order creation — amount reflects what's actually
+/mnt/data/fix56work/controllers/subOrderController.js:610:    await adminClient.from("ledger_entries").insert({
+/mnt/data/fix56work/controllers/subOrderController.js:647:    // refund a legitimate promotion spend.
+/mnt/data/fix56work/controllers/subOrderController.js:656:          await refundToPromotionsBudget({ reference: mainOrderId, type: "COUPON_DISCOUNT" });
+/mnt/data/fix56work/controllers/subOrderController.js:729:      .select("id, status, order_id, vendor_id, rider_id, vendor_payout, rider_payout, delivery_type")
+/mnt/data/fix56work/controllers/subOrderController.js:802:      const withdrawalAt = new Date();
+/mnt/data/fix56work/controllers/subOrderController.js:803:      withdrawalAt.setHours(withdrawalAt.getHours() + 1);
+/mnt/data/fix56work/controllers/subOrderController.js:805:      updates.withdrawal_available_at = withdrawalAt.toISOString();
+/mnt/data/fix56work/controllers/subOrderController.js:817:    // either write landed, then both go on to credit balances below.
+/mnt/data/fix56work/controllers/subOrderController.js:848:    // credit left behind by a crash (vendor/rider/platform/ledger) and is also
+/mnt/data/fix56work/controllers/subOrderController.js:859:    // paid, actually start a refund. Previously this branch only
+/mnt/data/fix56work/controllers/subOrderController.js:875:          await initiatePreDeliveryCancellationRefund({
+/mnt/data/fix56work/controllers/subOrderController.js:880:        } catch (refundErr) {
+/mnt/data/fix56work/controllers/subOrderController.js:881:          console.error(`[cancel-sub-order] Refund initiation failed for ${subOrder.id}:`, refundErr.message);
+/mnt/data/fix56work/controllers/subOrderController.js:883:            "Cancellation refund failed to initiate",
+/mnt/data/fix56work/controllers/subOrderController.js:884:            `Sub-order ${subOrder.id} was cancelled after payment, but the automatic refund could not be started (${refundErr.message}). Needs manual review.`
+/mnt/data/fix56work/controllers/subOrderController.js:911:      // or be refunded after payment, and those orders must not count as
+/mnt/data/fix56work/controllers/subOrderController.js:924:            "credit_customer_referral",
+/mnt/data/fix56work/controllers/subOrderController.js:1021:    // through inventory release and refund initiation a second time.
+/mnt/data/fix56work/controllers/subOrderController.js:1036:    // If payment was actually collected, start the refund now — this
+/mnt/data/fix56work/controllers/subOrderController.js:1037:    // route previously just said "refund will be processed" without
+/mnt/data/fix56work/controllers/subOrderController.js:1041:    const { data: parentOrderForRefund } = await adminClient
+/mnt/data/fix56work/controllers/subOrderController.js:1047:    if (parentOrderForRefund?.payment_status === "successful") {
+/mnt/data/fix56work/controllers/subOrderController.js:1049:        await initiatePreDeliveryCancellationRefund({
+/mnt/data/fix56work/controllers/subOrderController.js:1054:      } catch (refundErr) {
+/mnt/data/fix56work/controllers/subOrderController.js:1055:        console.error(`[cancel-sub-order] Refund initiation failed for ${subOrder.id}:`, refundErr.message);
+/mnt/data/fix56work/controllers/subOrderController.js:1057:          "Cancellation refund failed to initiate",
+/mnt/data/fix56work/controllers/subOrderController.js:1058:          `Sub-order ${subOrder.id} was cancelled by the customer after payment, but the automatic refund could not be started (${refundErr.message}). Needs manual review.`
+/mnt/data/fix56work/controllers/subOrderController.js:1063:    res.json({ success: true, message: "Sub-order cancelled. Refund will be processed if payment was made." });
+/mnt/data/fix56work/controllers/subOrderController.js:1070:// CREDIT PENDING BALANCE HELPER
+/mnt/data/fix56work/controllers/subOrderController.js:1071:// Wraps the atomic credit_pending_balance() SQL function (see
+/mnt/data/fix56work/controllers/subOrderController.js:1072:// settlement_hold_migration.sql). Replaces the old upsertBalance,
+/mnt/data/fix56work/controllers/subOrderController.js:1076:// silently losing one credit). Also now credits pending_balance
+/mnt/data/fix56work/controllers/subOrderController.js:1077:// instead of available_balance directly — money only becomes
+/mnt/data/fix56work/controllers/subOrderController.js:1078:// withdrawable once release_matured_sub_order_balances() moves it
+/mnt/data/fix56work/controllers/subOrderController.js:1079:// across, after withdrawal_available_at has passed.
+/mnt/data/fix56work/controllers/subOrderController.js:1081:const creditPendingBalance = async (userId, amount) => {
+/mnt/data/fix56work/controllers/subOrderController.js:1082:  const { error } = await adminClient.rpc("credit_pending_balance", { p_user_id: userId, p_amount: amount });
+/mnt/data/fix56work/controllers/platformRevenueController.js:13:const getPlatformBalance = async (req,res) => {
+/mnt/data/fix56work/controllers/platformRevenueController.js:18:    res.json({success:true,balance:data});
+/mnt/data/fix56work/controllers/platformRevenueController.js:22:const getPlatformLedger = async (req,res) => {
+/mnt/data/fix56work/controllers/platformRevenueController.js:24:    const { data,error } = await adminClient.from("platform_ledger_entries")
+/mnt/data/fix56work/controllers/platformRevenueController.js:31:const getPlatformWithdrawals = async (req,res) => {
+/mnt/data/fix56work/controllers/platformRevenueController.js:33:    const { data,error } = await adminClient.from("platform_withdrawals")
+/mnt/data/fix56work/controllers/platformRevenueController.js:36:    res.json({success:true,withdrawals:data||[]});
+/mnt/data/fix56work/controllers/platformRevenueController.js:40:const requestPlatformWithdrawal = async (req,res) => {
+/mnt/data/fix56work/controllers/platformRevenueController.js:45:      return res.status(400).json({success:false,message:"Enter a valid withdrawal amount."});
+/mnt/data/fix56work/controllers/platformRevenueController.js:49:    // Balance deduction, single-active-withdrawal check, withdrawal row,
+/mnt/data/fix56work/controllers/platformRevenueController.js:50:    // and platform ledger entry now happen in ONE PostgreSQL transaction.
+/mnt/data/fix56work/controllers/platformRevenueController.js:51:    // This prevents a partial request from leaving the balance and ledger
+/mnt/data/fix56work/controllers/platformRevenueController.js:55:    const {data:withdrawal,error}=await adminClient.rpc("create_platform_withdrawal_atomic",{
+/mnt/data/fix56work/controllers/platformRevenueController.js:56:      p_withdrawal_id:id,
+/mnt/data/fix56work/controllers/platformRevenueController.js:66:      const message=error.message||"Unable to create platform withdrawal.";
+/mnt/data/fix56work/controllers/platformRevenueController.js:68:        return res.status(400).json({success:false,message:"A platform withdrawal is already pending or processing."});
+/mnt/data/fix56work/controllers/platformRevenueController.js:69:      if(message.includes("Insufficient platform balance"))
+/mnt/data/fix56work/controllers/platformRevenueController.js:70:        return res.status(400).json({success:false,message:"Insufficient platform balance."});
+/mnt/data/fix56work/controllers/platformRevenueController.js:71:      if(message.includes("Invalid withdrawal amount"))
+/mnt/data/fix56work/controllers/platformRevenueController.js:72:        return res.status(400).json({success:false,message:"Enter a valid withdrawal amount."});
+/mnt/data/fix56work/controllers/platformRevenueController.js:76:    res.status(201).json({success:true,withdrawal});
+/mnt/data/fix56work/controllers/platformRevenueController.js:80:const approvePlatformWithdrawal = async (req,res) => {
+/mnt/data/fix56work/controllers/platformRevenueController.js:81:  let transferCallAttempted = false;
+/mnt/data/fix56work/controllers/platformRevenueController.js:83:    const {data:withdrawal,error}=await adminClient.from("platform_withdrawals")
+/mnt/data/fix56work/controllers/platformRevenueController.js:85:    if(error||!withdrawal) return res.status(404).json({success:false,message:"Platform withdrawal not found."});
+/mnt/data/fix56work/controllers/platformRevenueController.js:86:    if(withdrawal.status!=="PENDING") return res.status(400).json({success:false,message:"Platform withdrawal is not pending."});
+/mnt/data/fix56work/controllers/platformRevenueController.js:89:    const { data: claimed } = await adminClient.rpc("claim_platform_withdrawal_for_approval", {

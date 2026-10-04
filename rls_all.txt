@@ -1,0 +1,156 @@
+/mnt/data/fix44/supabase/refund_reservation_idempotency_fix.sql:44:  FOR UPDATE;
+/mnt/data/fix44/supabase/platform_withdrawal_request_atomic_fix.sql:27:  FOR UPDATE;
+/mnt/data/fix44/supabase/close_rls_gap_migration.sql:24:ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/close_rls_gap_migration.sql:25:ALTER TABLE coupon_redemptions ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/close_rls_gap_migration.sql:26:ALTER TABLE review_helpful_votes ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/close_rls_gap_migration.sql:27:ALTER TABLE platform_accounts ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/close_rls_gap_migration.sql:28:ALTER TABLE platform_ledger_entries ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/close_rls_gap_migration.sql:29:ALTER TABLE platform_withdrawals ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/financial_safety_migration.sql:219:  FROM payments WHERE id = p_payment_id FOR UPDATE;
+/mnt/data/fix44/supabase/financial_safety_migration.sql:296:    FOR UPDATE
+/mnt/data/fix44/supabase/customer_referral_migration.sql:84:  FOR UPDATE;
+/mnt/data/fix44/supabase/inventory_atomicity_fix.sql:48:    FOR UPDATE;
+/mnt/data/fix44/supabase/money_architecture_v2.sql:80:    FOR UPDATE
+/mnt/data/fix44/supabase/money_architecture_v2.sql:146:      FROM balances b WHERE b.user_id = p_user_id FOR UPDATE
+/mnt/data/fix44/supabase/money_architecture_v2.sql:163:          ORDER BY created_at ASC FOR UPDATE
+/mnt/data/fix44/supabase/money_architecture_v2.sql:203:    FOR UPDATE
+/mnt/data/fix44/supabase/money_architecture_v2.sql:205:    FOR p IN SELECT * FROM sub_order_payouts WHERE sub_order_id=so.id AND role IN ('vendor','rider') FOR UPDATE LOOP
+/mnt/data/fix44/supabase/money_architecture_v2.sql:234:  SELECT * INTO r FROM refunds WHERE id=p_refund_id FOR UPDATE;
+/mnt/data/fix44/supabase/money_architecture_v2.sql:252:  WHERE id='00000000-0000-0000-0000-000000000001' FOR UPDATE;
+/mnt/data/fix44/supabase/review_helpful_atomic_fix.sql:24:  PERFORM 1 FROM reviews WHERE id = p_review_id FOR UPDATE;
+/mnt/data/fix44/supabase/push_notifications_migration.sql:28:ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/delivered_financials_recovery_fix.sql:33:  FOR UPDATE;
+/mnt/data/fix44/supabase/rider_verification_migration.sql:37:ALTER TABLE rider_verification_logs ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rider_verification_migration.sql:39:CREATE POLICY "Riders can view their own verification logs"
+/mnt/data/fix44/supabase/promotions_reconciliation_fix.sql:33:  FOR UPDATE;
+/mnt/data/fix44/supabase/coupon_concurrency_fix.sql:14:-- create_order_with_sub_orders() now locks the coupon row FOR UPDATE
+/mnt/data/fix44/supabase/coupon_concurrency_fix.sql:55:    FOR UPDATE;
+/mnt/data/fix44/supabase/rls_policies.sql:7:ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:8:ALTER TABLE regions ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:9:ALTER TABLE delivery_settings ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:10:ALTER TABLE fee_settings ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:11:ALTER TABLE vendors ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:12:ALTER TABLE riders ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:13:ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:14:ALTER TABLE product_variants ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:15:ALTER TABLE inventory_reservations ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:16:ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:17:ALTER TABLE sub_orders ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:18:ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:19:ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:20:ALTER TABLE balances ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:21:ALTER TABLE withdrawals ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:22:ALTER TABLE ledger_entries ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:23:ALTER TABLE refunds ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:24:ALTER TABLE receipts ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:25:ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:26:ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:27:ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:28:ALTER TABLE support_tickets ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:29:ALTER TABLE faq_entries ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:30:ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+/mnt/data/fix44/supabase/rls_policies.sql:44:CREATE POLICY "users_select_own" ON users
+/mnt/data/fix44/supabase/rls_policies.sql:48:CREATE POLICY "users_update_own" ON users
+/mnt/data/fix44/supabase/rls_policies.sql:49:  FOR UPDATE USING (id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:52:CREATE POLICY "users_admin_select_all" ON users
+/mnt/data/fix44/supabase/rls_policies.sql:56:CREATE POLICY "users_admin_update_all" ON users
+/mnt/data/fix44/supabase/rls_policies.sql:57:  FOR UPDATE USING (get_user_role() = 'admin');
+/mnt/data/fix44/supabase/rls_policies.sql:60:CREATE POLICY "users_insert_public" ON users
+/mnt/data/fix44/supabase/rls_policies.sql:61:  FOR INSERT WITH CHECK (true);
+/mnt/data/fix44/supabase/rls_policies.sql:67:CREATE POLICY "regions_select_public" ON regions
+/mnt/data/fix44/supabase/rls_policies.sql:71:CREATE POLICY "regions_admin_all" ON regions
+/mnt/data/fix44/supabase/rls_policies.sql:78:CREATE POLICY "delivery_settings_select_public" ON delivery_settings
+/mnt/data/fix44/supabase/rls_policies.sql:82:CREATE POLICY "delivery_settings_admin_all" ON delivery_settings
+/mnt/data/fix44/supabase/rls_policies.sql:89:CREATE POLICY "fee_settings_select_public" ON fee_settings
+/mnt/data/fix44/supabase/rls_policies.sql:93:CREATE POLICY "fee_settings_admin_all" ON fee_settings
+/mnt/data/fix44/supabase/rls_policies.sql:100:CREATE POLICY "vendors_select_approved_public" ON vendors
+/mnt/data/fix44/supabase/rls_policies.sql:104:CREATE POLICY "vendors_select_own" ON vendors
+/mnt/data/fix44/supabase/rls_policies.sql:108:CREATE POLICY "vendors_update_own" ON vendors
+/mnt/data/fix44/supabase/rls_policies.sql:109:  FOR UPDATE USING (user_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:112:CREATE POLICY "vendors_insert_own" ON vendors
+/mnt/data/fix44/supabase/rls_policies.sql:113:  FOR INSERT WITH CHECK (user_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:116:CREATE POLICY "vendors_admin_all" ON vendors
+/mnt/data/fix44/supabase/rls_policies.sql:123:CREATE POLICY "riders_select_own" ON riders
+/mnt/data/fix44/supabase/rls_policies.sql:127:CREATE POLICY "riders_update_own" ON riders
+/mnt/data/fix44/supabase/rls_policies.sql:128:  FOR UPDATE USING (user_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:131:CREATE POLICY "riders_insert_own" ON riders
+/mnt/data/fix44/supabase/rls_policies.sql:132:  FOR INSERT WITH CHECK (user_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:135:CREATE POLICY "riders_admin_all" ON riders
+/mnt/data/fix44/supabase/rls_policies.sql:142:CREATE POLICY "products_select_public" ON products
+/mnt/data/fix44/supabase/rls_policies.sql:146:CREATE POLICY "products_select_own_vendor" ON products
+/mnt/data/fix44/supabase/rls_policies.sql:152:CREATE POLICY "products_insert_own" ON products
+/mnt/data/fix44/supabase/rls_policies.sql:153:  FOR INSERT WITH CHECK (
+/mnt/data/fix44/supabase/rls_policies.sql:158:CREATE POLICY "products_update_own" ON products
+/mnt/data/fix44/supabase/rls_policies.sql:159:  FOR UPDATE USING (
+/mnt/data/fix44/supabase/rls_policies.sql:164:CREATE POLICY "products_delete_own" ON products
+/mnt/data/fix44/supabase/rls_policies.sql:165:  FOR DELETE USING (
+/mnt/data/fix44/supabase/rls_policies.sql:170:CREATE POLICY "products_admin_all" ON products
+/mnt/data/fix44/supabase/rls_policies.sql:177:CREATE POLICY "variants_select_public" ON product_variants
+/mnt/data/fix44/supabase/rls_policies.sql:183:CREATE POLICY "variants_vendor_all" ON product_variants
+/mnt/data/fix44/supabase/rls_policies.sql:193:CREATE POLICY "variants_admin_all" ON product_variants
+/mnt/data/fix44/supabase/rls_policies.sql:200:CREATE POLICY "inventory_reservations_admin_all" ON inventory_reservations
+/mnt/data/fix44/supabase/rls_policies.sql:204:CREATE POLICY "inventory_reservations_vendor_select" ON inventory_reservations
+/mnt/data/fix44/supabase/rls_policies.sql:217:CREATE POLICY "orders_select_own_customer" ON orders
+/mnt/data/fix44/supabase/rls_policies.sql:221:CREATE POLICY "orders_insert_customer" ON orders
+/mnt/data/fix44/supabase/rls_policies.sql:222:  FOR INSERT WITH CHECK (customer_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:225:CREATE POLICY "orders_update_own_customer" ON orders
+/mnt/data/fix44/supabase/rls_policies.sql:226:  FOR UPDATE USING (customer_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:229:CREATE POLICY "orders_admin_all" ON orders
+/mnt/data/fix44/supabase/rls_policies.sql:236:CREATE POLICY "sub_orders_select_customer" ON sub_orders
+/mnt/data/fix44/supabase/rls_policies.sql:242:CREATE POLICY "sub_orders_select_vendor" ON sub_orders
+/mnt/data/fix44/supabase/rls_policies.sql:248:CREATE POLICY "sub_orders_update_vendor" ON sub_orders
+/mnt/data/fix44/supabase/rls_policies.sql:249:  FOR UPDATE USING (
+/mnt/data/fix44/supabase/rls_policies.sql:254:CREATE POLICY "sub_orders_select_rider" ON sub_orders
+/mnt/data/fix44/supabase/rls_policies.sql:260:CREATE POLICY "sub_orders_update_rider" ON sub_orders
+/mnt/data/fix44/supabase/rls_policies.sql:261:  FOR UPDATE USING (
+/mnt/data/fix44/supabase/rls_policies.sql:267:CREATE POLICY "sub_orders_admin_all" ON sub_orders
+/mnt/data/fix44/supabase/rls_policies.sql:274:CREATE POLICY "order_items_select_customer" ON order_items
+/mnt/data/fix44/supabase/rls_policies.sql:280:CREATE POLICY "order_items_select_vendor" ON order_items
+/mnt/data/fix44/supabase/rls_policies.sql:290:CREATE POLICY "order_items_select_rider" ON order_items
+/mnt/data/fix44/supabase/rls_policies.sql:300:CREATE POLICY "order_items_admin_all" ON order_items
+/mnt/data/fix44/supabase/rls_policies.sql:307:CREATE POLICY "payments_select_own_customer" ON payments
+/mnt/data/fix44/supabase/rls_policies.sql:313:CREATE POLICY "payments_admin_all" ON payments
+/mnt/data/fix44/supabase/rls_policies.sql:320:CREATE POLICY "balances_select_own" ON balances
+/mnt/data/fix44/supabase/rls_policies.sql:324:CREATE POLICY "balances_admin_all" ON balances
+/mnt/data/fix44/supabase/rls_policies.sql:331:CREATE POLICY "withdrawals_select_own" ON withdrawals
+/mnt/data/fix44/supabase/rls_policies.sql:335:CREATE POLICY "withdrawals_insert_own" ON withdrawals
+/mnt/data/fix44/supabase/rls_policies.sql:336:  FOR INSERT WITH CHECK (requester_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:339:CREATE POLICY "withdrawals_admin_all" ON withdrawals
+/mnt/data/fix44/supabase/rls_policies.sql:346:CREATE POLICY "ledger_select_own" ON ledger_entries
+/mnt/data/fix44/supabase/rls_policies.sql:351:CREATE POLICY "ledger_admin_select_all" ON ledger_entries
+/mnt/data/fix44/supabase/rls_policies.sql:358:CREATE POLICY "refunds_select_own_customer" ON refunds
+/mnt/data/fix44/supabase/rls_policies.sql:362:CREATE POLICY "refunds_insert_customer" ON refunds
+/mnt/data/fix44/supabase/rls_policies.sql:363:  FOR INSERT WITH CHECK (customer_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:366:CREATE POLICY "refunds_admin_all" ON refunds
+/mnt/data/fix44/supabase/rls_policies.sql:373:CREATE POLICY "receipts_select_own" ON receipts
+/mnt/data/fix44/supabase/rls_policies.sql:377:CREATE POLICY "receipts_admin_all" ON receipts
+/mnt/data/fix44/supabase/rls_policies.sql:384:CREATE POLICY "reviews_select_public" ON reviews
+/mnt/data/fix44/supabase/rls_policies.sql:388:CREATE POLICY "reviews_insert_customer" ON reviews
+/mnt/data/fix44/supabase/rls_policies.sql:389:  FOR INSERT WITH CHECK (customer_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:392:CREATE POLICY "reviews_admin_all" ON reviews
+/mnt/data/fix44/supabase/rls_policies.sql:399:CREATE POLICY "disputes_select_own_customer" ON disputes
+/mnt/data/fix44/supabase/rls_policies.sql:403:CREATE POLICY "disputes_insert_customer" ON disputes
+/mnt/data/fix44/supabase/rls_policies.sql:404:  FOR INSERT WITH CHECK (customer_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:407:CREATE POLICY "disputes_update_own_customer" ON disputes
+/mnt/data/fix44/supabase/rls_policies.sql:408:  FOR UPDATE USING (customer_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:411:CREATE POLICY "disputes_select_vendor" ON disputes
+/mnt/data/fix44/supabase/rls_policies.sql:422:CREATE POLICY "disputes_admin_all" ON disputes
+/mnt/data/fix44/supabase/rls_policies.sql:429:CREATE POLICY "notifications_select_own" ON notifications
+/mnt/data/fix44/supabase/rls_policies.sql:433:CREATE POLICY "notifications_update_own" ON notifications
+/mnt/data/fix44/supabase/rls_policies.sql:434:  FOR UPDATE USING (user_id = auth.uid()::text);
+/mnt/data/fix44/supabase/rls_policies.sql:437:CREATE POLICY "notifications_admin_all" ON notifications
+/mnt/data/fix44/supabase/rls_policies.sql:444:CREATE POLICY "tickets_select_own" ON support_tickets
+/mnt/data/fix44/supabase/rls_policies.sql:448:CREATE POLICY "tickets_insert_own" ON support_tickets
+/mnt/data/fix44/supabase/rls_policies.sql:449:  FOR INSERT WITH CHECK (user_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:452:CREATE POLICY "tickets_update_own" ON support_tickets
+/mnt/data/fix44/supabase/rls_policies.sql:453:  FOR UPDATE USING (user_id = auth.uid());
+/mnt/data/fix44/supabase/rls_policies.sql:456:CREATE POLICY "tickets_admin_all" ON support_tickets
+/mnt/data/fix44/supabase/rls_policies.sql:463:CREATE POLICY "faq_select_public" ON faq_entries
+/mnt/data/fix44/supabase/rls_policies.sql:467:CREATE POLICY "faq_admin_all" ON faq_entries
+/mnt/data/fix44/supabase/rls_policies.sql:474:CREATE POLICY "audit_logs_admin_select" ON audit_logs
+/mnt/data/fix44/supabase/rls_users_public_insert_fix.sql:5:--   CREATE POLICY "users_insert_public" ON users
+/mnt/data/fix44/supabase/rls_users_public_insert_fix.sql:6:--     FOR INSERT WITH CHECK (true);
+/mnt/data/fix44/supabase/promotions_paystack_funding_migration.sql:36:  FOR UPDATE;
+/mnt/data/fix44/supabase/protect_self_update_columns_migration.sql:8:--   FOR UPDATE USING (user_id = auth.uid())
+/mnt/data/fix44/supabase/protect_self_update_columns_migration.sql:9:-- with no WITH CHECK clause. That only restricts WHICH ROW a user
+/mnt/data/fix44/supabase/protect_self_update_columns_migration.sql:119:-- carve out a narrower WITH CHECK instead of removing this trigger.

@@ -1,0 +1,31 @@
+-- ============================================================
+-- INVITE CODE — REMOVE UNIQUE CONSTRAINT ON invite_codes.code
+-- Run this in Supabase SQL Editor AFTER operational_migrations.sql
+-- (invite_codes is created there).
+--
+-- WHY: invite_codes.code was UNIQUE from the start (schema.sql /
+-- operational_migrations.sql). Codes are generated with
+-- `CM-{ROLE}-` + 6 random base36 characters (~31 bits of entropy)
+-- via Math.random() — not cryptographically random, and with limited
+-- space, especially under repeated rapid-fire generation during
+-- testing. A collision there hits this UNIQUE constraint and blocks
+-- the insert outright with no application-level explanation.
+--
+-- IMPORTANT — this only removes the DATABASE constraint. It does NOT
+-- touch the invite-code business logic:
+--   - validateInviteCode / useInviteCode / pilotGuard's lookups all
+--     filter by (code, role, is_used = false) together, not code
+--     alone, so two different DUPLICATE-CODE rows for different
+--     roles were never actually ambiguous in practice.
+--   - The one theoretical edge case this opens up: if two UNUSED
+--     codes for the SAME role ever end up with the identical code
+--     string, a lookup filtered to exactly that (code, role,
+--     is_used=false) combination could match more than one row,
+--     and Supabase's .single() throws on more than one match rather
+--     than just picking one. Given the entropy above this is very
+--     unlikely, but if it ever shows up as a validate/use-invite
+--     error, that's the mechanism — regenerating either code
+--     resolves it immediately, no schema change needed.
+-- ============================================================
+
+ALTER TABLE invite_codes DROP CONSTRAINT IF EXISTS invite_codes_code_key;
